@@ -1,9 +1,11 @@
 import 'package:eid_wallet/core/models/wallet_models.dart';
 import 'package:eid_wallet/core/models/wallet_state.dart';
+import 'package:eid_wallet/features/auth/auth_screen.dart';
 import 'package:eid_wallet/features/onboarding/welcome_screen.dart';
 import 'package:eid_wallet/features/registration/eid_registration_screen.dart';
 import 'package:eid_wallet/features/registration/registration_method_screen.dart';
 import 'package:eid_wallet/widgets/app_text_field.dart';
+import 'package:eid_wallet/widgets/auth_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -42,18 +44,98 @@ void main() {
   });
 
   group('Welcome screen', () {
-    testWidgets('offers both entry points and the language toggle',
+    testWidgets('offers one way forward and the language toggle',
         (tester) async {
       await setPhoneSurface(tester);
       await tester.pumpWidget(wrapScreen(const WelcomeScreen()));
 
-      expect(find.text(my.createWallet), findsOneWidget);
-      expect(find.text(my.signInExisting), findsOneWidget);
+      // Sign in versus register is asked on the next screen, not this one.
+      expect(find.widgetWithText(FilledButton, my.letsGetStarted),
+          findsOneWidget);
+      expect(find.byType(OutlinedButton), findsNothing);
       expect(find.text('မြန်မာ'), findsOneWidget);
       expect(find.text('English'), findsOneWidget);
     });
   });
 
+
+  group('Auth screen', () {
+    testWidgets('signing in asks for email, phone and UID — but not a name',
+        (tester) async {
+      await setPhoneSurface(tester);
+      await tester.pumpWidget(wrapScreen(const AuthScreen()));
+
+      expect(find.byType(AuthField), findsNWidgets(3));
+      expect(find.text(my.fieldFullName), findsNothing);
+      expect(find.text(my.fieldEmail), findsOneWidget);
+      expect(find.text(my.fieldPhone), findsOneWidget);
+      expect(find.text(my.fieldUidNumber), findsOneWidget);
+    });
+
+    testWidgets('the Create account tab adds the name field and keeps typing',
+        (tester) async {
+      await setPhoneSurface(tester);
+      await tester.pumpWidget(wrapScreen(const AuthScreen()));
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, my.fieldEmail),
+        'aung.ko@example.com',
+      );
+      await tester.tap(find.text(my.authTabSignUp));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AuthField), findsNWidgets(4));
+      expect(find.text(my.fieldFullName), findsOneWidget);
+      // Switching tabs must not throw away what has already been typed.
+      expect(find.text('aung.ko@example.com'), findsOneWidget);
+    });
+
+    testWidgets('an empty form is rejected field by field', (tester) async {
+      await setPhoneSurface(tester);
+      await tester.pumpWidget(wrapScreen(const AuthScreen()));
+
+      await tester.tap(find.widgetWithText(FilledButton, my.authTabSignIn));
+      await tester.pumpAndSettle();
+
+      expect(find.text(my.errRequired), findsNWidgets(3));
+    });
+
+    testWidgets('a completed sign-up is written to the draft', (tester) async {
+      await setPhoneSurface(tester);
+      final wallet = WalletState();
+      await tester.pumpWidget(wrapScreen(
+        const AuthScreen(initialMode: AuthMode.signUp),
+        wallet: wallet,
+        // Submitting pushes the OTP screen, whose resend countdown would still
+        // be running at teardown. This test is about the draft, not the route.
+        onGenerateRoute: (settings) =>
+            MaterialPageRoute<dynamic>(builder: (_) => const SizedBox()),
+      ));
+
+      await tester.enterText(
+          find.widgetWithText(TextFormField, my.fieldFullName), 'Aung Ko Ko');
+      await tester.enterText(find.widgetWithText(TextFormField, my.fieldEmail),
+          'aung.ko@example.com');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, my.fieldPhone), '9 123 456 789');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, my.fieldUidNumber), 'UID12345678');
+      await tester.pumpAndSettle();
+
+      // Four fields push the action below the fold on a 390×844 handset.
+      final submit = find.widgetWithText(FilledButton, my.authTabSignUp);
+      await tester.ensureVisible(submit);
+      await tester.pumpAndSettle();
+      await tester.tap(submit);
+      await tester.pumpAndSettle();
+
+      // A Latin name belongs in the English slot, not the Myanmar one.
+      expect(wallet.draft.nameEn, 'Aung Ko Ko');
+      expect(wallet.draft.nameMy, isEmpty);
+      expect(wallet.draft.email, 'aung.ko@example.com');
+      expect(wallet.draft.uid, 'UID12345678');
+    });
+  });
   group('Registration method screen', () {
     testWidgets('Continue stays disabled until a method is chosen',
         (tester) async {

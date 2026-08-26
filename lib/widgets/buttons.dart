@@ -15,6 +15,7 @@ class PrimaryButton extends StatelessWidget {
     this.onPressed,
     this.busy = false,
     this.icon,
+    this.compact = false,
   });
 
   final String label;
@@ -22,10 +23,21 @@ class PrimaryButton extends StatelessWidget {
   final bool busy;
   final IconData? icon;
 
+  /// Hug the label instead of filling the row. The shared style sets a
+  /// minimum width of infinity — right for a form's submit, wrong for a
+  /// standalone invitation like the welcome screen's single action.
+  final bool compact;
+
   @override
   Widget build(BuildContext context) {
     return FilledButton(
       onPressed: busy ? null : onPressed,
+      style: compact
+          ? FilledButton.styleFrom(
+              minimumSize: const Size(0, 56),
+              padding: const EdgeInsets.symmetric(horizontal: Gap.xxxl),
+            )
+          : null,
       child: busy
           ? const SizedBox(
               height: 22,

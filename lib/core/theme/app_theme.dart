@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,7 +12,7 @@ abstract final class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: AppColors.surfaceMuted,
+      scaffoldBackgroundColor: AppColors.surface,
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         onPrimary: AppColors.textOnPrimary,

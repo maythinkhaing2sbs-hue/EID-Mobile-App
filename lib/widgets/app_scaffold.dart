@@ -49,9 +49,9 @@ class AppScaffold extends StatelessWidget {
     final showProgress = step != null && totalSteps != null;
 
     return Scaffold(
-      backgroundColor: background ?? AppColors.surfaceMuted,
+      backgroundColor: background ?? AppColors.surface,
       appBar: AppBar(
-        backgroundColor: background ?? AppColors.surfaceMuted,
+        backgroundColor: background ?? AppColors.surface,
         automaticallyImplyLeading: false,
         titleSpacing: showBack ? 0 : 20,
         leading: showBack
