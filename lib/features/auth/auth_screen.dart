@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/l10n/app_strings.dart';
+import '../../core/models/wallet_models.dart';
 import '../../core/models/wallet_state.dart';
 import '../../core/router/routes.dart';
 import '../../core/theme/app_colors.dart';
@@ -27,6 +28,11 @@ enum AuthMode { signIn, signUp }
 /// conventional login, and deliberately so: this is a government identity
 /// wallet, and the three together are what the issuer matches against the
 /// national register.
+///
+/// Creating an account does not sign the user in. It confirms and returns to
+/// the sign-in tab, because everything past this screen belongs to a session
+/// and a session starts by signing in — the same path the user will take on
+/// every later visit, learned once here.
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key, this.initialMode = AuthMode.signIn});
 
@@ -86,7 +92,11 @@ class _AuthScreenState extends State<AuthScreen> {
     final draft = WalletScope.read(context).draft
       ..email = _email.text.trim()
       ..phone = _phone.text.trim()
-      ..uid = _uid.text.trim();
+      ..uid = _uid.text.trim()
+      // The one-time code goes to the address. This is the wallet's own
+      // account rather than a handset, and the mailbox is the channel the
+      // register can reach wherever the citizen is.
+      ..method = RegistrationMethod.email;
 
     if (_isSignUp) {
       // The card carries the name in both scripts. Which slot a single entry
@@ -98,14 +108,45 @@ class _AuthScreenState extends State<AuthScreen> {
       } else {
         draft.nameMy = name;
       }
-
-      // New account: verify the channel, then set up PIN and biometrics.
-      Navigator.of(context).pushNamed(Routes.registerOtp);
-    } else {
-      // Returning holder: the wallet already exists, so go straight to the
-      // unlock gate rather than back through registration.
-      Navigator.of(context).pushNamed(Routes.unlock);
+      _confirmSignUp();
+      return;
     }
+
+    // Signing in is a one-time-code challenge rather than a stored-password
+    // check: there is no cheaper way to prove the person still holds the
+    // address on file, and what follows it — PIN, then the holder key — is
+    // the same work either way.
+    Navigator.of(context).pushNamed(Routes.registerOtp);
+  }
+
+  /// Confirms the new account, then hands the user to the sign-in tab with
+  /// what they typed still in place — one field to re-enter, not four.
+  Future<void> _confirmSignUp() async {
+    final s = AppStrings.of(context);
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.check_circle_rounded,
+            size: 44, color: AppColors.success),
+        title: Text(s.authSignUpDoneTitle, textAlign: TextAlign.center),
+        content: Text(
+          s.authSignUpDoneBody,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(s.authTabSignIn),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted) return;
+    _switchTo(AuthMode.signIn);
   }
 
   @override
@@ -263,18 +304,12 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
 
           Gap.h24,
+          // No "no account yet?" link under it: the segmented control above
+          // is the same switch, and offering it twice on a four-field form
+          // only pushed the action itself further down a short handset.
           PrimaryButton(
             label: _isSignUp ? s.authTabSignUp : s.authTabSignIn,
             onPressed: _submit,
-          ),
-          Gap.h8,
-          TextButton(
-            onPressed: () =>
-                _switchTo(_isSignUp ? AuthMode.signIn : AuthMode.signUp),
-            child: Text(
-              _isSignUp ? s.authHaveAccount : s.authNoAccount,
-              textAlign: TextAlign.center,
-            ),
           ),
         ],
       ),

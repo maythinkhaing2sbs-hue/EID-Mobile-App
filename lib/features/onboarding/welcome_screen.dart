@@ -56,14 +56,36 @@ class WelcomeScreen extends StatelessWidget {
                   child: AppLogo(height: 82),
                 ),
                 Gap.h24,
-                Text(
-                  s.welcomeTitle,
-                  style: text.displayLarge,
+                Text.rich(
+                  _titleSpan(s.welcomeTitle, s.welcomeTitleAccent),
+                  // Looser leading than the shared display style: this is
+                  // the only two-line headline in the app, and Myanmar sets
+                  // marks above and below the baseline that collide at the
+                  // tighter tracking body copy can afford.
+                  style: text.displayLarge?.copyWith(height: 1.52),
                   textAlign: TextAlign.start,
                 ),
 
                 const Spacer(flex: 3),
 
+                // Centred and hugging its label rather than full-bleed: on a
+                // screen with a single action there is nothing to line it up
+                // with, and the pill reads as an invitation rather than a form
+                // submit.
+                Center(
+                  child: PrimaryButton(
+                    label: s.letsGetStarted,
+                    compact: true,
+                    onPressed: () =>
+                        Navigator.of(context).pushNamed(Routes.auth),
+                  ),
+                ),
+                Gap.h16,
+
+                // Provenance sits under the action, not above it. It is a
+                // footnote about who stands behind the app — worth saying,
+                // but not worth putting between the user and the one thing
+                // this screen asks them to do.
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -79,20 +101,6 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                Gap.h16,
-
-                // Centred and hugging its label rather than full-bleed: on a
-                // screen with a single action there is nothing to line it up
-                // with, and the pill reads as an invitation rather than a form
-                // submit.
-                Center(
-                  child: PrimaryButton(
-                    label: s.letsGetStarted,
-                    compact: true,
-                    onPressed: () =>
-                        Navigator.of(context).pushNamed(Routes.auth),
-                  ),
-                ),
                 Gap.h24,
               ],
             ),
@@ -101,4 +109,27 @@ class WelcomeScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The welcome headline with the product's name lifted into brand blue.
+///
+/// The run to tint comes from the string table rather than being hard-coded
+/// here: it opens the Myanmar sentence and sits mid-sentence in the English
+/// one, so a lookup keeps both locales on one code path. Copy that leaves the
+/// two out of step degrades to a plain, untinted title rather than throwing.
+TextSpan _titleSpan(String title, String accent) {
+  final start = accent.isEmpty ? -1 : title.indexOf(accent);
+  if (start < 0) return TextSpan(text: title);
+
+  final end = start + accent.length;
+  return TextSpan(
+    children: [
+      if (start > 0) TextSpan(text: title.substring(0, start)),
+      TextSpan(
+        text: accent,
+        style: const TextStyle(color: AppColors.primary),
+      ),
+      if (end < title.length) TextSpan(text: title.substring(end)),
+    ],
+  );
 }

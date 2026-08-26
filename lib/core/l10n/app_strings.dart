@@ -56,6 +56,11 @@ class AppStrings {
 
   // ── 1. Welcome ──────────────────────────────────────────────────────────
   String get welcomeTitle => _s('welcomeTitle');
+
+  /// The run inside [welcomeTitle] that carries the product's name, tinted
+  /// brand blue on the screen. Localised because the two scripts name the
+  /// wallet differently and place it at opposite ends of the sentence.
+  String get welcomeTitleAccent => _s('welcomeTitleAccent');
   String get letsGetStarted => _s('letsGetStarted');
   String get issuedByGovernment => _s('issuedByGovernment');
 
@@ -66,8 +71,8 @@ class AppStrings {
   String get authSignInHeadlineSub => _s('authSignInHeadlineSub');
   String get authSignUpHeadline => _s('authSignUpHeadline');
   String get authSignUpHeadlineSub => _s('authSignUpHeadlineSub');
-  String get authNoAccount => _s('authNoAccount');
-  String get authHaveAccount => _s('authHaveAccount');
+  String get authSignUpDoneTitle => _s('authSignUpDoneTitle');
+  String get authSignUpDoneBody => _s('authSignUpDoneBody');
   String get fieldFullName => _s('fieldFullName');
   String get fieldUidNumber => _s('fieldUidNumber');
   String get errUidNumber => _s('errUidNumber');
@@ -113,9 +118,9 @@ class AppStrings {
   // ── 5. Wallet ready ─────────────────────────────────────────────────────
   String get readyTitle => _s('readyTitle');
   String get readySubtitle => _s('readySubtitle');
-  String get readyStepPhone => _s('readyStepPhone');
+  String get readyStepEmail => _s('readyStepEmail');
   String get readyStepPin => _s('readyStepPin');
-  String get secureWalletCta => _s('secureWalletCta');
+  String get goToKeyPair => _s('goToKeyPair');
   String get goToWalletHome => _s('goToWalletHome');
 
   // ── 6–7. Holder key pair ────────────────────────────────────────────────
@@ -249,7 +254,8 @@ class AppStrings {
     'security': 'လုံခြုံရေး',
     'stepOf': 'အဆင့် {a} / {b}',
 
-    'welcomeTitle': 'အမျိုးသား EID Wallet မှ ကြိုဆိုပါသည်',
+    'welcomeTitle': 'National EID Wallet\nမှ ကြိုဆိုပါသည်',
+    'welcomeTitleAccent': 'National EID Wallet',
     'letsGetStarted': 'စတင်လိုက်ရအောင်!',
     'issuedByGovernment': 'ပြည်ထောင်စုသမ္မတမြန်မာနိုင်ငံတော်အစိုးရ မှ ထုတ်ပေးသည်',
 
@@ -259,8 +265,9 @@ class AppStrings {
     'authSignInHeadlineSub': 'သင့် EID Wallet သို့ ဝင်ရောက်ပါ။',
     'authSignUpHeadline': 'အကောင့်အသစ် ဖန်တီးပါ',
     'authSignUpHeadlineSub': 'အချက်အလက် ဖြည့်၍ စတင်လိုက်ပါ။',
-    'authNoAccount': 'အကောင့် မရှိသေးပါသလား? ဖန်တီးရန်',
-    'authHaveAccount': 'အကောင့် ရှိပြီးသားလား? ဝင်ရောက်ရန်',
+    'authSignUpDoneTitle': 'အကောင့် ဖွင့်ပြီးပါပြီ!',
+    'authSignUpDoneBody':
+        'သင့်အကောင့်ကို ဖန်တီးပြီးပါပြီ။ ဆက်လက်အသုံးပြုရန် ဝင်ရောက်ပါ။',
     'fieldFullName': 'အမည် အပြည့်အစုံ',
     'fieldUidNumber': 'UID နံပါတ်',
     'errUidNumber': 'UID နံပါတ်ကို မှန်ကန်စွာ ထည့်သွင်းပါ။',
@@ -286,7 +293,7 @@ class AppStrings {
     'errUid': 'မှတ်ပုံတင်အမှတ် ပုံစံ မမှန်ပါ။ ဥပမာ — 12/ABC(N)123456',
 
     'otpTitle': 'သင့်ဖုန်းနံပါတ်ကို အတည်ပြုပါ',
-    'otpTitleEmail': 'သင့်အီးမေးလ်ကို အတည်ပြုပါ',
+    'otpTitleEmail': 'သင့် အီးမေးလ် OTP ကို အတည်ပြုပါ',
     'otpSentTo': 'ကုဒ် ပေးပို့သည့်နေရာ',
     'otpHint': 'ဂဏန်း ၆ လုံးပါ ကုဒ်ကို ရိုက်ထည့်ပါ။',
     'resendCode': 'ကုဒ် ပြန်ပို့ရန်',
@@ -305,9 +312,9 @@ class AppStrings {
     'readyTitle': 'သင့် Wallet အဆင်သင့် ဖြစ်ပါပြီ!',
     'readySubtitle':
         'အခြေခံ စာရင်းသွင်းမှု ပြီးဆုံးပါပြီ။ နောက်တစ်ဆင့်အဖြစ် သင့်လုံခြုံရေး သော့ကို ဖန်တီးပါမည်။',
-    'readyStepPhone': 'ဖုန်းနံပါတ် အတည်ပြုပြီး',
+    'readyStepEmail': 'အီးမေးလ်လိပ်စာ အတည်ပြုပြီး',
     'readyStepPin': 'လုံခြုံရေး PIN သတ်မှတ်ပြီး',
-    'secureWalletCta': 'Wallet ကို လုံခြုံအောင် ပြုလုပ်ရန်',
+    'goToKeyPair': 'Key Pair သို့ သွားရန်',
     'goToWalletHome': 'Wallet Home သို့ သွားရန်',
 
     'keyIntroTitle': 'သင့် Wallet ကို လုံခြုံအောင် ပြုလုပ်ခြင်း',
@@ -434,18 +441,19 @@ class AppStrings {
     'stepOf': 'Step {a} of {b}',
 
     'welcomeTitle': 'Welcome to the National Digital ID Wallet',
+    'welcomeTitleAccent': 'Digital ID Wallet',
     'letsGetStarted': "Let's Get Started!",
     'issuedByGovernment':
         'Issued by the Government of the Republic of the Union of Myanmar',
 
     'authTabSignIn': 'Sign In',
-    'authTabSignUp': 'Create Account',
+    'authTabSignUp': 'Sign Up',
     'authSignInHeadline': 'Welcome back',
     'authSignInHeadlineSub': 'Sign in to manage your digital ID.',
     'authSignUpHeadline': 'Create your account',
     'authSignUpHeadlineSub': 'Fill in your details to get started.',
-    'authNoAccount': 'No account yet? Create one',
-    'authHaveAccount': 'Already have an account? Sign in',
+    'authSignUpDoneTitle': 'Account created',
+    'authSignUpDoneBody': 'Your account is ready. Sign in to continue.',
     'fieldFullName': 'Full name',
     'fieldUidNumber': 'UID Number',
     'errUidNumber': 'Enter a valid UID number.',
@@ -471,7 +479,7 @@ class AppStrings {
     'errUid': 'Invalid UID format. Example: 12/ABC(N)123456',
 
     'otpTitle': 'Verify your phone number',
-    'otpTitleEmail': 'Verify your email address',
+    'otpTitleEmail': 'Verify your Email OTP',
     'otpSentTo': 'Code sent to',
     'otpHint': 'Enter the 6-digit code.',
     'resendCode': 'Resend code',
@@ -490,9 +498,9 @@ class AppStrings {
     'readyTitle': 'Your Wallet is Ready!',
     'readySubtitle':
         'Basic registration is complete. Next we will create the security key that protects your credentials.',
-    'readyStepPhone': 'Phone number verified',
+    'readyStepEmail': 'Email address verified',
     'readyStepPin': 'Secure PIN created',
-    'secureWalletCta': 'Secure your wallet',
+    'goToKeyPair': 'Go to Key Pair',
     'goToWalletHome': 'Go to Wallet Home',
 
     'keyIntroTitle': 'Securing your Wallet',

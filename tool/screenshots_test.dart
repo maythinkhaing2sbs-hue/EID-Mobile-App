@@ -16,6 +16,7 @@ import 'package:eid_wallet/core/models/wallet_state.dart';
 import 'package:eid_wallet/core/router/routes.dart';
 import 'package:eid_wallet/core/theme/app_theme.dart';
 import 'package:eid_wallet/core/theme/text_scale_clamp.dart';
+import 'package:eid_wallet/features/auth/auth_screen.dart';
 import 'package:eid_wallet/features/credential/credential_issuing_screen.dart';
 import 'package:eid_wallet/features/credential/request_credential_screen.dart';
 import 'package:eid_wallet/features/home/wallet_home_screen.dart';
@@ -53,6 +54,7 @@ void main() {
   /// captured in both languages.
   final screens = <String, Widget Function()>{
     '01-welcome': () => const WelcomeScreen(),
+    '01b-auth': () => const AuthScreen(),
     '02-register-method': () => const RegistrationMethodScreen(),
     '03-verify-otp': () => const OtpScreen(),
     '04-create-pin': () => const PinSetupScreen(),
@@ -91,10 +93,12 @@ void main() {
           ..holderKey = HolderKey.demo(DateTime(2026, 5, 15, 10, 30));
 
         // A populated draft makes the registration screen show its selected +
-        // filled state and gives the OTP screen a real masked number to
-        // display, rather than the empty placeholder.
+        // filled state and gives the OTP screen a real masked address to
+        // display, rather than the empty placeholder. Email, because that is
+        // the channel the sign-in flow uses for the code.
         wallet.draft
-          ..method = RegistrationMethod.phone
+          ..method = RegistrationMethod.email
+          ..email = 'aung.ko@example.com'
           ..phone = '9 123 456 789';
 
         await tester.pumpWidget(_harness(build(), wallet, locale));

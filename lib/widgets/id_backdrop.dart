@@ -11,8 +11,6 @@ import '../core/theme/app_colors.dart';
 /// that is the point — the screen should read as "this is your ID", not as a
 /// generic app splash:
 ///
-/// * **Guilloché rosettes** — the interlaced engine-turned curves printed on
-///   passports and banknotes as an anti-counterfeit feature.
 /// * **A ghosted credential card** — portrait window, chip, data lines.
 /// * **A fingerprint** — the biometric half of the identity.
 /// * **Microline hatching and a dot grid** — the security substrate.
@@ -68,8 +66,6 @@ class _IdBackdropPainter extends CustomPainter {
     _paintWash(canvas, w, h);
     _paintDotGrid(canvas, w, h);
     _paintMicrolines(canvas, w, h);
-    _paintGuilloche(canvas, Offset(w * 0.86, h * 0.12), w * 0.42);
-    _paintGuilloche(canvas, Offset(w * 0.08, h * 0.78), w * 0.34);
     _paintGhostCard(canvas, w, h);
     _paintFingerprint(canvas, Offset(w * 0.84, h * 0.86), w * 0.20);
   }
@@ -124,48 +120,6 @@ class _IdBackdropPainter extends CustomPainter {
   }
 
   // ── Motifs ─────────────────────────────────────────────────────────────
-
-  /// Guilloché rosette — a family of hypotrochoids sharing a centre. The three
-  /// radii below were chosen so the curves close cleanly and interlace rather
-  /// than overlap into a solid disc.
-  void _paintGuilloche(Canvas canvas, Offset centre, double radius) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.9
-      ..color = _ink(0.13);
-
-    for (final petals in [7, 11, 17]) {
-      final r = radius / petals;
-      final d = r * (petals == 11 ? 2.4 : 1.9);
-      final path = Path();
-
-      // 0.5° steps: fine enough that the curve reads as engraving, coarse
-      // enough to stay cheap on a low-end handset.
-      for (var deg = 0; deg <= 360 * 2; deg++) {
-        final t = deg * math.pi / 360;
-        final k = radius - r;
-        final p = Offset(
-          centre.dx + k * math.cos(t) + d * math.cos(k / r * t),
-          centre.dy + k * math.sin(t) - d * math.sin(k / r * t),
-        );
-        deg == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
-      }
-      canvas.drawPath(path, paint);
-      paint.color = _ink(0.085);
-    }
-
-    // Concentric guide rings, as on the printed original.
-    for (final f in [0.42, 0.66, 1.0]) {
-      canvas.drawCircle(
-        centre,
-        radius * f,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.8
-          ..color = _ink(0.07),
-      );
-    }
-  }
 
   /// A credential in outline: the object the whole app is about, ghosted into
   /// the paper at ID-1 proportions (85.6 × 54 mm) and tilted like a card laid
