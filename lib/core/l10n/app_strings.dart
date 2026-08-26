@@ -56,10 +56,21 @@ class AppStrings {
 
   // ── 1. Welcome ──────────────────────────────────────────────────────────
   String get welcomeTitle => _s('welcomeTitle');
-  String get welcomeSubtitle => _s('welcomeSubtitle');
-  String get createWallet => _s('createWallet');
-  String get signInExisting => _s('signInExisting');
+  String get letsGetStarted => _s('letsGetStarted');
   String get issuedByGovernment => _s('issuedByGovernment');
+
+  // ── 1b. Sign in / Create account ────────────────────────────────────────
+  String get authTabSignIn => _s('authTabSignIn');
+  String get authTabSignUp => _s('authTabSignUp');
+  String get authSignInHeadline => _s('authSignInHeadline');
+  String get authSignInHeadlineSub => _s('authSignInHeadlineSub');
+  String get authSignUpHeadline => _s('authSignUpHeadline');
+  String get authSignUpHeadlineSub => _s('authSignUpHeadlineSub');
+  String get authNoAccount => _s('authNoAccount');
+  String get authHaveAccount => _s('authHaveAccount');
+  String get fieldFullName => _s('fieldFullName');
+  String get fieldUidNumber => _s('fieldUidNumber');
+  String get errUidNumber => _s('errUidNumber');
 
   // ── 2. Registration method + identifier ─────────────────────────────────
   String get registerMethodTitle => _s('registerMethodTitle');
@@ -239,11 +250,20 @@ class AppStrings {
     'stepOf': 'အဆင့် {a} / {b}',
 
     'welcomeTitle': 'အမျိုးသား EID Wallet မှ ကြိုဆိုပါသည်',
-    'welcomeSubtitle':
-        'သင့်ဒစ်ဂျစ်တယ် မှတ်ပုံတင်ကို ဖုန်းအတွင်း လုံခြုံစွာ သိမ်းဆည်းပြီး လိုအပ်သည့်အခါတိုင်း တင်ပြနိုင်ပါသည်။',
-    'createWallet': 'Wallet အသစ် ဖန်တီးရန်',
-    'signInExisting': 'ရှိပြီးသား Wallet ဖြင့် ဝင်ရန်',
+    'letsGetStarted': 'စတင်လိုက်ရအောင်!',
     'issuedByGovernment': 'ပြည်ထောင်စုသမ္မတမြန်မာနိုင်ငံတော်အစိုးရ မှ ထုတ်ပေးသည်',
+
+    'authTabSignIn': 'ဝင်ရောက်ရန်',
+    'authTabSignUp': 'အကောင့်ဖွင့်ရန်',
+    'authSignInHeadline': 'ပြန်လည် ကြိုဆိုပါသည်',
+    'authSignInHeadlineSub': 'သင့် EID Wallet သို့ ဝင်ရောက်ပါ။',
+    'authSignUpHeadline': 'အကောင့်အသစ် ဖန်တီးပါ',
+    'authSignUpHeadlineSub': 'အချက်အလက် ဖြည့်၍ စတင်လိုက်ပါ။',
+    'authNoAccount': 'အကောင့် မရှိသေးပါသလား? ဖန်တီးရန်',
+    'authHaveAccount': 'အကောင့် ရှိပြီးသားလား? ဝင်ရောက်ရန်',
+    'fieldFullName': 'အမည် အပြည့်အစုံ',
+    'fieldUidNumber': 'UID နံပါတ်',
+    'errUidNumber': 'UID နံပါတ်ကို မှန်ကန်စွာ ထည့်သွင်းပါ။',
 
     'registerMethodTitle': 'မည်သည့်နည်းဖြင့် စာရင်းသွင်းလိုပါသလဲ?',
     'registerMethodSubtitle':
@@ -414,12 +434,21 @@ class AppStrings {
     'stepOf': 'Step {a} of {b}',
 
     'welcomeTitle': 'Welcome to the National Digital ID Wallet',
-    'welcomeSubtitle':
-        'Keep your government-issued digital ID safely on your phone and present it whenever it is needed.',
-    'createWallet': 'Create New Wallet',
-    'signInExisting': 'Sign In with Existing Wallet',
+    'letsGetStarted': "Let's Get Started!",
     'issuedByGovernment':
         'Issued by the Government of the Republic of the Union of Myanmar',
+
+    'authTabSignIn': 'Sign In',
+    'authTabSignUp': 'Create Account',
+    'authSignInHeadline': 'Welcome back',
+    'authSignInHeadlineSub': 'Sign in to manage your digital ID.',
+    'authSignUpHeadline': 'Create your account',
+    'authSignUpHeadlineSub': 'Fill in your details to get started.',
+    'authNoAccount': 'No account yet? Create one',
+    'authHaveAccount': 'Already have an account? Sign in',
+    'fieldFullName': 'Full name',
+    'fieldUidNumber': 'UID Number',
+    'errUidNumber': 'Enter a valid UID number.',
 
     'registerMethodTitle': 'How would you like to register?',
     'registerMethodSubtitle':

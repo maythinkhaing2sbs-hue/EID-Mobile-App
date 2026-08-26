@@ -83,7 +83,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(en.welcomeTitle), findsOneWidget);
-      expect(find.text(en.createWallet), findsOneWidget);
+      expect(find.text(en.letsGetStarted), findsOneWidget);
       expect(find.text(my.welcomeTitle), findsNothing);
 
       await tester.tap(find.text('မြန်မာ'));
@@ -112,10 +112,19 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.needHelp,
   (s) => s.security,
   (s) => s.welcomeTitle,
-  (s) => s.welcomeSubtitle,
-  (s) => s.createWallet,
-  (s) => s.signInExisting,
+  (s) => s.letsGetStarted,
   (s) => s.issuedByGovernment,
+  (s) => s.authTabSignIn,
+  (s) => s.authTabSignUp,
+  (s) => s.authSignInHeadline,
+  (s) => s.authSignInHeadlineSub,
+  (s) => s.authSignUpHeadline,
+  (s) => s.authSignUpHeadlineSub,
+  (s) => s.authNoAccount,
+  (s) => s.authHaveAccount,
+  (s) => s.fieldFullName,
+  (s) => s.fieldUidNumber,
+  (s) => s.errUidNumber,
   (s) => s.registerMethodTitle,
   (s) => s.registerMethodSubtitle,
   (s) => s.methodPhone,
