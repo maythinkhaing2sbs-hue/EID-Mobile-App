@@ -166,7 +166,7 @@ void main() {
       final pin = PinController()..push('1');
       final before = pin.errorTrigger;
 
-      pin.fail();
+      pin.fail(PinError.mismatch);
 
       expect(pin.value, isEmpty);
       expect(pin.hasError, isTrue);
@@ -210,7 +210,21 @@ void main() {
         email: 'aung.ko@example.com',
         method: RegistrationMethod.email,
       );
-      expect(byEmail.otpTarget, 'a******@example.com');
+      expect(byEmail.otpTarget, 'a••••••@example.com');
+    });
+
+    test('masking hides digits without dropping any', () {
+      // Regression: the previous mask spliced the string and silently lost
+      // three digits, so the screen showed a number that was not the user's
+      // and they had no way to tell.
+      for (final number in ['9123456789', '65656546546', '9791234567']) {
+        final masked = RegistrationDraft.maskPhone(number);
+        final shown = masked.replaceFirst('+95 ', '');
+        expect(shown.length, number.length,
+            reason: 'mask must preserve length for $number');
+        expect(shown.substring(0, 2), number.substring(0, 2));
+        expect(shown.substring(shown.length - 3), number.substring(number.length - 3));
+      }
     });
   });
 }

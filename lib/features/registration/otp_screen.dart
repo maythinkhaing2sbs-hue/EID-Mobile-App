@@ -1,18 +1,31 @@
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_strings.dart';
+import '../../core/models/wallet_models.dart';
 import '../../core/models/wallet_state.dart';
 import '../../core/router/routes.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
+import '../../core/theme/app_typography.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/otp_field.dart';
+import '../../widgets/pulse_icon.dart';
 
-/// Screen 4 — verify the one-time code.
+/// Step 2 — verify the one-time code.
+///
+/// Deliberately spare: an icon, a heading, the destination, six boxes. Every
+/// container that was here before — the chip around the number, the card around
+/// the resend — was chrome drawn around content that already read fine on its
+/// own, and it crowded a screen the user needs to scan in one glance while
+/// holding an SMS in their other hand.
+///
+/// The number is set in the tabular face and given its own line, so it can be
+/// checked digit by digit; "Change" sits directly under it as plain text,
+/// because a mistyped digit is the commonest way this screen dead-ends and a
+/// back arrow does not read as "fix the number".
 ///
 /// Demo rule: any 6 digits verify, except `000000`, which is wired to the
-/// failure path so the error state is reachable during review.
+/// failure path so the error state stays reachable during review.
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key});
 
@@ -21,13 +34,13 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  final _otpKey = GlobalKey<State<OtpField>>();
+  final _otpKey = GlobalKey<OtpFieldState>();
   String _code = '';
   String? _error;
   bool _busy = false;
 
   Future<void> _verify() async {
-    if (_code.length != 6) return;
+    if (_code.length != 6 || _busy) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -41,6 +54,7 @@ class _OtpScreenState extends State<OtpScreen> {
         _busy = false;
         _error = AppStrings.of(context).errOtp;
       });
+      _otpKey.currentState?.clear();
       return;
     }
 
@@ -51,11 +65,13 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
+    final text = Theme.of(context).textTheme;
     final draft = WalletScope.of(context).draft;
+    final byEmail = draft.method == RegistrationMethod.email;
 
     return AppScaffold(
-      step: 3,
-      totalSteps: 4,
+      step: 2,
+      totalSteps: 3,
       bottomBar: PrimaryButton(
         label: s.verify,
         busy: _busy,
@@ -64,37 +80,71 @@ class _OtpScreenState extends State<OtpScreen> {
       child: ListView(
         padding: const EdgeInsets.only(top: Gap.sm, bottom: Gap.xl),
         children: [
-          // A single illustration anchors the screen. Kept as an icon in a
-          // tinted disc rather than a stock illustration — it renders at any
-          // density and never looks like clip art.
           Center(
-            child: Container(
-              height: 88,
-              width: 88,
-              decoration: const BoxDecoration(
-                color: AppColors.secondary,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.mark_email_read_outlined,
-                  size: 40, color: AppColors.primary),
+            child: PulseIcon(
+              icon: byEmail
+                  ? Icons.mark_email_unread_rounded
+                  : Icons.sms_rounded,
             ),
           ),
-          Gap.h32,
-          ScreenHeader(
-            title: s.otpTitle,
-            subtitle: s.otpSubtitle(draft.otpTarget),
-            align: CrossAxisAlignment.center,
+
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 120),
+            child: Column(
+              children: [
+                Text(
+                  byEmail ? s.otpTitleEmail : s.otpTitle,
+                  style: text.headlineMedium,
+                  textAlign: TextAlign.center,
+                ),
+                Gap.h12,
+
+                // Lead-in and number on one centred line: the label is context,
+                // the number is the fact being checked, so only the number
+                // takes weight.
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: '${s.otpSentTo} ', style: text.bodyMedium),
+                      TextSpan(
+                        text: draft.otpTarget,
+                        style: AppTypography.numeric(
+                          size: 15,
+                          weight: FontWeight.w600,
+                          spacing: 0.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                TextButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(0, 40),
+                    padding: const EdgeInsets.symmetric(horizontal: Gap.md),
+                  ),
+                  child: Text(s.change),
+                ),
+              ],
+            ),
           ),
-          Gap.h32,
-          OtpField(
-            key: _otpKey,
-            errorText: _error,
-            onChanged: (v) => setState(() {
-              _code = v;
-              if (_error != null) _error = null;
-            }),
-            onCompleted: (_) => _verify(),
+
+          Gap.h16,
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 220),
+            child: OtpField(
+              key: _otpKey,
+              errorText: _error,
+              onChanged: (v) => setState(() {
+                _code = v;
+                if (_error != null) _error = null;
+              }),
+              onCompleted: (_) => _verify(),
+            ),
           ),
+
           Gap.h24,
           Center(
             child: ResendTimer(
@@ -102,9 +152,10 @@ class _OtpScreenState extends State<OtpScreen> {
               waitingLabel: s.resendIn,
               resendLabel: s.resendCode,
               onResend: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(s.resendCode)),
-                );
+                _otpKey.currentState?.clear();
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(SnackBar(content: Text(s.resendCode)));
               },
             ),
           ),

@@ -119,6 +119,12 @@ class BottomActionBar extends StatelessWidget {
 /// Segmented progress bar. Segments rather than a continuous track because a
 /// citizen filling in a government form wants to know *how many steps are
 /// left*, not an abstract percentage.
+///
+/// Each segment fills left-to-right rather than snapping to a new colour, so
+/// advancing a step reads as forward motion. The newest segment carries a soft
+/// glow at its leading edge — enough to draw the eye to the change, and it
+/// settles the moment the fill lands. Nothing here loops: a progress bar that
+/// animates forever stops meaning "progress".
 class StepProgress extends StatelessWidget {
   const StepProgress({super.key, required this.step, required this.total});
 
@@ -132,15 +138,55 @@ class StepProgress extends StatelessWidget {
       child: Row(
         children: List.generate(total, (i) {
           final done = i < step;
+          final isNewest = i == step - 1;
+
           return Expanded(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 260),
-              curve: Curves.easeOut,
-              height: 4,
-              margin: EdgeInsets.only(right: i == total - 1 ? 0 : 6),
-              decoration: BoxDecoration(
-                color: done ? AppColors.primary : AppColors.surfaceSunken,
-                borderRadius: BorderRadius.circular(2),
+            child: Padding(
+              padding: EdgeInsets.only(right: i == total - 1 ? 0 : 6),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0, end: done ? 1 : 0),
+                duration: const Duration(milliseconds: 480),
+                curve: Curves.easeOutCubic,
+                builder: (context, t, _) => SizedBox(
+                  height: 5,
+                  child: Stack(
+                    children: [
+                      // Track.
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceSunken,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                      // Fill.
+                      if (t > 0)
+                        FractionallySizedBox(
+                          widthFactor: t,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(3),
+                              gradient: const LinearGradient(
+                                colors: [
+                                  AppColors.primary,
+                                  AppColors.primaryDark,
+                                ],
+                              ),
+                              boxShadow: isNewest && t < 1
+                                  ? [
+                                      BoxShadow(
+                                        color: AppColors.primary
+                                            .withValues(alpha: 0.45),
+                                        blurRadius: 8,
+                                        spreadRadius: 1,
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
             ),
           );

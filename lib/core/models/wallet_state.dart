@@ -48,10 +48,26 @@ class WalletState extends ChangeNotifier {
     return key;
   }
 
+  /// The National ID exactly as it will be issued, with whatever the holder
+  /// gave at registration written over the sample record. The request screen
+  /// previews *this* object and [issueCredential] stores it, so what the user
+  /// approves and what lands in the wallet can never disagree.
+  WalletCredential get pendingNationalId =>
+      WalletCredential.sampleNationalId.withClaims({
+        ClaimId.fullName: displayName,
+        if (draft.dateOfBirth case final dob?)
+          ClaimId.dateOfBirth: _isoDate(dob),
+      });
+
+  static String _isoDate(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-'
+      '${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
+
   /// Stand-in for the OpenID4VCI authorization-code flow: authorize → token →
   /// credential request carrying the holder public key as proof of possession.
   Future<WalletCredential> issueCredential() async {
-    const credential = WalletCredential.sampleNationalId;
+    final credential = pendingNationalId;
     if (!credentials.any((c) => c.id == credential.id)) {
       credentials.add(credential);
     }
@@ -67,6 +83,10 @@ class WalletState extends ChangeNotifier {
         WalletCredential.sampleNationalId,
         WalletCredential.samplePassport,
       ]);
+      // There is no biometric enrolment screen in the flow, so nothing else
+      // would ever set this — and the unlock keypad would never offer its
+      // biometric key. The demo session opts in on the user's behalf.
+      biometricsEnabled = true;
       notifyListeners();
     }
   }

@@ -26,11 +26,9 @@ import 'package:eid_wallet/features/presentation/confirm_share_screen.dart';
 import 'package:eid_wallet/features/presentation/qr_scan_screen.dart';
 import 'package:eid_wallet/features/presentation/review_request_screen.dart';
 import 'package:eid_wallet/features/presentation/select_credential_screen.dart';
-import 'package:eid_wallet/features/registration/eid_registration_screen.dart';
 import 'package:eid_wallet/features/registration/otp_screen.dart';
 import 'package:eid_wallet/features/registration/registration_method_screen.dart';
 import 'package:eid_wallet/features/registration/wallet_ready_screen.dart';
-import 'package:eid_wallet/features/security/biometrics_screen.dart';
 import 'package:eid_wallet/features/security/pin_setup_screen.dart';
 import 'package:eid_wallet/features/verifier/reading_data_screen.dart';
 import 'package:eid_wallet/features/verifier/verification_result_screen.dart';
@@ -56,24 +54,22 @@ void main() {
   final screens = <String, Widget Function()>{
     '01-welcome': () => const WelcomeScreen(),
     '02-register-method': () => const RegistrationMethodScreen(),
-    '03-register-eid': () => const EidRegistrationScreen(),
-    '04-verify-otp': () => const OtpScreen(),
-    '05-create-pin': () => const PinSetupScreen(),
-    '05b-biometrics': () => const BiometricsScreen(),
-    '06-wallet-ready': () => const WalletReadyScreen(),
-    '07-create-key-pair': () => const CreateKeyPairScreen(),
-    '08-key-pair-created': () => const KeyPairCreatedScreen(),
-    '09-request-credential': () => const RequestCredentialScreen(),
-    '09b-issuing': () => const CredentialIssuingScreen(),
-    '10-qr-scan': () => const QrScanScreen(),
-    '11-review-request': () => const ReviewRequestScreen(request: _request),
-    '12-select-credential': () =>
+    '03-verify-otp': () => const OtpScreen(),
+    '04-create-pin': () => const PinSetupScreen(),
+    '05-wallet-ready': () => const WalletReadyScreen(),
+    '06-create-key-pair': () => const CreateKeyPairScreen(),
+    '07-key-pair-created': () => const KeyPairCreatedScreen(),
+    '08-request-credential': () => const RequestCredentialScreen(),
+    '08b-issuing': () => const CredentialIssuingScreen(),
+    '09-qr-scan': () => const QrScanScreen(),
+    '10-review-request': () => const ReviewRequestScreen(request: _request),
+    '11-select-credential': () =>
         const SelectCredentialScreen(request: _request),
-    '13-confirm-share': () => const ConfirmShareScreen(args: _args),
-    '14-reading-data': () => const ReadingDataScreen(args: _args),
-    '15-verification-result': () =>
+    '12-confirm-share': () => const ConfirmShareScreen(args: _args),
+    '13-reading-data': () => const ReadingDataScreen(args: _args),
+    '14-verification-result': () =>
         const VerificationResultScreen(args: _args),
-    '16-wallet-home': () => const WalletHomeScreen(),
+    '15-wallet-home': () => const WalletHomeScreen(),
   };
 
   for (final locale in const [Locale('my'), Locale('en')]) {
@@ -94,11 +90,24 @@ void main() {
           ..setBiometrics(true)
           ..holderKey = HolderKey.demo(DateTime(2026, 5, 15, 10, 30));
 
+        // A populated draft makes the registration screen show its selected +
+        // filled state and gives the OTP screen a real masked number to
+        // display, rather than the empty placeholder.
+        wallet.draft
+          ..method = RegistrationMethod.phone
+          ..phone = '9 123 456 789';
+
         await tester.pumpWidget(_harness(build(), wallet, locale));
 
-        // Let entry animations land without waiting on the repeating ones
-        // (the scanner sweep and the reader pulse never settle).
-        await tester.pump(const Duration(milliseconds: 900));
+        // Let entrance animations run to rest. A single large pump is not
+        // enough: it advances the clock once, so any animation still has only
+        // one frame of progress and staggered content can be caught part-way
+        // through its fade. Several smaller pumps drive them to completion,
+        // without waiting on the repeating ones (the scanner sweep and the
+        // reader pulse never settle).
+        for (var i = 0; i < 12; i++) {
+          await tester.pump(const Duration(milliseconds: 200));
+        }
 
         await expectLater(
           find.byType(MaterialApp),

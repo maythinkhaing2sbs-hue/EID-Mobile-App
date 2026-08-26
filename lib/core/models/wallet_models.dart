@@ -60,6 +60,21 @@ class WalletCredential {
   String issuerName(AppStrings s) =>
       issuerKey == 'mofa' ? s.issuerMofa : s.issuerMoha;
 
+  /// The same credential with some claim values replaced.
+  ///
+  /// Issuance is previewed before it happens, so the request screen and the
+  /// stored credential have to be built from one object — otherwise the values
+  /// the holder consented to and the values that land in the wallet can drift.
+  WalletCredential withClaims(Map<ClaimId, String> overrides) =>
+      WalletCredential(
+        id: id,
+        kind: kind,
+        issuerKey: issuerKey,
+        validUntil: validUntil,
+        format: format,
+        claims: {...claims, ...overrides},
+      );
+
   static const WalletCredential sampleNationalId = WalletCredential(
     id: 'urn:uuid:3978344f-8596-4c3a-a978-8fcaba3903c5',
     kind: CredentialKind.nationalId,
@@ -166,25 +181,61 @@ class RegistrationDraft {
   String uid;
   RegistrationMethod method;
 
-  /// Where the OTP is sent — masked for display on the verification screen.
-  String get otpTarget {
-    if (method == RegistrationMethod.email && email.isNotEmpty) {
-      return _maskEmail(email);
+  /// The value captured for a given registration method.
+  String identifierFor(RegistrationMethod method) => switch (method) {
+        RegistrationMethod.phone => phone,
+        RegistrationMethod.email => email,
+        RegistrationMethod.uid => uid,
+      };
+
+  void setIdentifier(RegistrationMethod method, String value) {
+    switch (method) {
+      case RegistrationMethod.phone:
+        phone = value;
+      case RegistrationMethod.email:
+        email = value;
+      case RegistrationMethod.uid:
+        uid = value;
     }
-    return phone.isEmpty ? '+95 9XX XXX XXX' : _maskPhone(phone);
   }
 
-  static String _maskPhone(String value) {
-    final digits = value.replaceAll(RegExp(r'\s'), '');
-    if (digits.length < 5) return value;
-    final tail = digits.substring(digits.length - 3);
-    return '${digits.substring(0, digits.length - 6)}XXX$tail';
+  /// Registering by UID sends the code to whatever number the government has
+  /// on file, which this app does not know — so the screen says exactly that
+  /// rather than inventing a masked number.
+  bool get otpGoesToRecordedNumber => method == RegistrationMethod.uid;
+
+  /// Where the OTP is sent — masked for display on the verification screen.
+  String get otpTarget => switch (method) {
+        RegistrationMethod.email =>
+          email.isEmpty ? '—' : maskEmail(email),
+        RegistrationMethod.phone =>
+          phone.isEmpty ? '+95 9•• ••• •••' : maskPhone(phone),
+        RegistrationMethod.uid => uid.isEmpty ? '—' : uid,
+      };
+
+  /// Hides the middle of a phone number while preserving its length.
+  ///
+  /// Length matters: a mask that drops digits shows the user a number that is
+  /// not theirs, and they cannot tell whether the app has the right one. Every
+  /// hidden digit is replaced one-for-one.
+  static String maskPhone(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    if (digits.length <= 4) return '+95 $digits';
+
+    const headLength = 2;
+    const tailLength = 3;
+    final head = digits.substring(0, headLength);
+    final tail = digits.substring(digits.length - tailLength);
+    final hidden = '•' * (digits.length - headLength - tailLength);
+    return '+95 $head$hidden$tail';
   }
 
-  static String _maskEmail(String value) {
+  /// `aung.ko@example.com` → `a•••••@example.com`. The domain stays visible so
+  /// the user can spot a typo in the part that decides where mail lands.
+  static String maskEmail(String value) {
     final at = value.indexOf('@');
     if (at <= 1) return value;
-    return '${value[0]}${'*' * (at - 1)}${value.substring(at)}';
+    return '${value[0]}${'•' * (at - 1)}${value.substring(at)}';
   }
 }
 
