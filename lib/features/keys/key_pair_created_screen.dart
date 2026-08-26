@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/l10n/app_strings.dart';
 import '../../core/models/wallet_state.dart';
+import '../../core/router/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_typography.dart';
@@ -36,8 +37,12 @@ class _KeyPairCreatedScreenState extends State<KeyPairCreatedScreen> {
       title: s.security,
       showBack: false,
       bottomBar: PrimaryButton(
-        label: s.done,
-        onPressed: () => Navigator.of(context).pop(),
+        label: s.goToWalletHome,
+        // Resets to home rather than popping: this is now the last step of
+        // onboarding, and the registration stack behind it must not be
+        // walkable. Reaching here from Home → Security simply returns there.
+        onPressed: () => Navigator.of(context)
+            .pushNamedAndRemoveUntil(Routes.home, (route) => false),
       ),
       child: ListView(
         padding: const EdgeInsets.only(top: Gap.xl, bottom: Gap.xl),

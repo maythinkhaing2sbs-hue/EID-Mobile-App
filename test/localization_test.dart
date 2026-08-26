@@ -61,8 +61,8 @@ void main() {
     });
 
     test('placeholders are substituted, not left in the output', () {
-      expect(my.otpSubtitle('+95 9XX XXX 123'), contains('+95 9XX XXX 123'));
-      expect(my.otpSubtitle('x'), isNot(contains('{t}')));
+      expect(my.resendIn('00:45'), contains('00:45'));
+      expect(my.resendIn('x'), isNot(contains('{t}')));
       expect(en.consentText('ABC Bank'), contains('ABC Bank'));
       expect(en.consentText('ABC Bank'), isNot(contains('{v}')));
       expect(en.validUntil('2030-12-31'), 'Valid until 2030-12-31');
@@ -108,6 +108,7 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.decline,
   (s) => s.share,
   (s) => s.skip,
+  (s) => s.change,
   (s) => s.needHelp,
   (s) => s.security,
   (s) => s.welcomeTitle,
@@ -124,24 +125,18 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.methodUid,
   (s) => s.methodUidDesc,
   (s) => s.recommended,
-  (s) => s.eidRegTitle,
-  (s) => s.eidRegSubtitle,
-  (s) => s.fieldNameMy,
-  (s) => s.fieldNameEn,
-  (s) => s.fieldDob,
   (s) => s.fieldPhone,
   (s) => s.fieldEmail,
   (s) => s.fieldUid,
-  (s) => s.hintNameMy,
-  (s) => s.hintNameEn,
   (s) => s.hintUid,
   (s) => s.errRequired,
   (s) => s.errPhone,
   (s) => s.errEmail,
   (s) => s.errUid,
-  (s) => s.errNameEn,
-  (s) => s.selectDate,
   (s) => s.otpTitle,
+  (s) => s.otpTitleEmail,
+  (s) => s.otpSentTo,
+  (s) => s.otpHint,
   (s) => s.resendCode,
   (s) => s.verify,
   (s) => s.errOtp,
@@ -150,13 +145,13 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.pinConfirmTitle,
   (s) => s.pinConfirmSubtitle,
   (s) => s.errPinMismatch,
-  (s) => s.bioTitle,
-  (s) => s.bioSubtitle,
-  (s) => s.bioEnable,
-  (s) => s.bioSkip,
-  (s) => s.bioFaceTouch,
+  (s) => s.errPinWeak,
+  (s) => s.pinNeverShare,
   (s) => s.readyTitle,
   (s) => s.readySubtitle,
+  (s) => s.readyStepPhone,
+  (s) => s.readyStepPin,
+  (s) => s.secureWalletCta,
   (s) => s.goToWalletHome,
   (s) => s.keyIntroTitle,
   (s) => s.keyIntroBody,
@@ -181,6 +176,9 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.credential,
   (s) => s.issuer,
   (s) => s.whatYouGet,
+  (s) => s.whatYouGetHint,
+  (s) => s.issuerVerified,
+  (s) => s.keyRequiredFirst,
   (s) => s.requestCredential,
   (s) => s.issuingTitle,
   (s) => s.stepAuthorize,

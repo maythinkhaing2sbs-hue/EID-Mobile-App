@@ -26,10 +26,10 @@ class OtpField extends StatefulWidget {
   final String? errorText;
 
   @override
-  State<OtpField> createState() => _OtpFieldState();
+  State<OtpField> createState() => OtpFieldState();
 }
 
-class _OtpFieldState extends State<OtpField> {
+class OtpFieldState extends State<OtpField> {
   late final TextEditingController _controller = TextEditingController();
   late final FocusNode _focus = FocusNode();
 
@@ -128,8 +128,11 @@ class _OtpFieldState extends State<OtpField> {
     );
   }
 
-  /// Lets the parent clear the field after a failed verification.
-  void clear() => _controller.clear();
+  /// Lets the parent clear the field after a failed verification or a resend.
+  void clear() {
+    _controller.clear();
+    _focus.requestFocus();
+  }
 }
 
 class _OtpBox extends StatelessWidget {
@@ -153,24 +156,38 @@ class _OtpBox extends StatelessWidget {
                 ? AppColors.border
                 : AppColors.borderStrong;
 
+    final bool filled = digit.isNotEmpty;
+
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 140),
-      height: 60,
-      width: 48,
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOut,
+      height: 62,
+      width: 50,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        // A filled box gets a tinted ground, so progress through the code is
+        // legible at a glance rather than only from the digits themselves.
+        color: error
+            ? AppColors.dangerSurface
+            : filled
+                ? AppColors.secondary
+                : AppColors.surface,
         borderRadius: Radii.fieldAll,
         border: Border.all(color: border, width: active || error ? 1.8 : 1),
         boxShadow: active ? AppColors.cardShadow : null,
       ),
-      child: Text(
-        digit,
-        style: AppTypography.numeric(
-          size: 24,
-          weight: FontWeight.w600,
-          color: error ? AppColors.danger : AppColors.textPrimary,
-          spacing: 0,
+      child: AnimatedScale(
+        scale: filled ? 1 : 0.6,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutBack,
+        child: Text(
+          filled ? digit : '',
+          style: AppTypography.numeric(
+            size: 25,
+            weight: FontWeight.w600,
+            color: error ? AppColors.danger : AppColors.textPrimary,
+            spacing: 0,
+          ),
         ),
       ),
     );

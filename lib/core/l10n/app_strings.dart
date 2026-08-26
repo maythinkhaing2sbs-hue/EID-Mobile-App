@@ -48,6 +48,7 @@ class AppStrings {
   String get decline => _s('decline');
   String get share => _s('share');
   String get skip => _s('skip');
+  String get change => _s('change');
   String get needHelp => _s('needHelp');
   String get security => _s('security');
   String stepOf(int step, int total) =>
@@ -60,7 +61,7 @@ class AppStrings {
   String get signInExisting => _s('signInExisting');
   String get issuedByGovernment => _s('issuedByGovernment');
 
-  // ── 2. Registration method ──────────────────────────────────────────────
+  // ── 2. Registration method + identifier ─────────────────────────────────
   String get registerMethodTitle => _s('registerMethodTitle');
   String get registerMethodSubtitle => _s('registerMethodSubtitle');
   String get methodPhone => _s('methodPhone');
@@ -70,53 +71,43 @@ class AppStrings {
   String get methodUid => _s('methodUid');
   String get methodUidDesc => _s('methodUidDesc');
   String get recommended => _s('recommended');
-
-  // ── 3. EID registration ─────────────────────────────────────────────────
-  String get eidRegTitle => _s('eidRegTitle');
-  String get eidRegSubtitle => _s('eidRegSubtitle');
-  String get fieldNameMy => _s('fieldNameMy');
-  String get fieldNameEn => _s('fieldNameEn');
-  String get fieldDob => _s('fieldDob');
   String get fieldPhone => _s('fieldPhone');
   String get fieldEmail => _s('fieldEmail');
   String get fieldUid => _s('fieldUid');
-  String get hintNameMy => _s('hintNameMy');
-  String get hintNameEn => _s('hintNameEn');
   String get hintUid => _s('hintUid');
   String get errRequired => _s('errRequired');
   String get errPhone => _s('errPhone');
   String get errEmail => _s('errEmail');
   String get errUid => _s('errUid');
-  String get errNameEn => _s('errNameEn');
-  String get selectDate => _s('selectDate');
 
-  // ── 4. OTP ──────────────────────────────────────────────────────────────
+  // ── 3. OTP ──────────────────────────────────────────────────────────────
   String get otpTitle => _s('otpTitle');
-  String otpSubtitle(String target) =>
-      _s('otpSubtitle').replaceFirst('{t}', target);
+  String get otpTitleEmail => _s('otpTitleEmail');
+  String get otpSentTo => _s('otpSentTo');
+  String get otpHint => _s('otpHint');
   String get resendCode => _s('resendCode');
   String resendIn(String time) => _s('resendIn').replaceFirst('{t}', time);
   String get verify => _s('verify');
   String get errOtp => _s('errOtp');
 
-  // ── 5. PIN & biometrics ─────────────────────────────────────────────────
+  // ── 4. PIN ──────────────────────────────────────────────────────────────
   String get pinTitle => _s('pinTitle');
   String get pinSubtitle => _s('pinSubtitle');
   String get pinConfirmTitle => _s('pinConfirmTitle');
   String get pinConfirmSubtitle => _s('pinConfirmSubtitle');
   String get errPinMismatch => _s('errPinMismatch');
-  String get bioTitle => _s('bioTitle');
-  String get bioSubtitle => _s('bioSubtitle');
-  String get bioEnable => _s('bioEnable');
-  String get bioSkip => _s('bioSkip');
-  String get bioFaceTouch => _s('bioFaceTouch');
+  String get errPinWeak => _s('errPinWeak');
+  String get pinNeverShare => _s('pinNeverShare');
 
-  // ── 6. Wallet ready ─────────────────────────────────────────────────────
+  // ── 5. Wallet ready ─────────────────────────────────────────────────────
   String get readyTitle => _s('readyTitle');
   String get readySubtitle => _s('readySubtitle');
+  String get readyStepPhone => _s('readyStepPhone');
+  String get readyStepPin => _s('readyStepPin');
+  String get secureWalletCta => _s('secureWalletCta');
   String get goToWalletHome => _s('goToWalletHome');
 
-  // ── 7–8. Holder key pair ────────────────────────────────────────────────
+  // ── 6–7. Holder key pair ────────────────────────────────────────────────
   String get keyIntroTitle => _s('keyIntroTitle');
   String get keyIntroBody => _s('keyIntroBody');
   String get keyPointPrivate => _s('keyPointPrivate');
@@ -136,12 +127,15 @@ class AppStrings {
   String get copied => _s('copied');
   String get copy => _s('copy');
 
-  // ── 9. Request credential ───────────────────────────────────────────────
+  // ── 8. Request credential ───────────────────────────────────────────────
   String get getYourIdTitle => _s('getYourIdTitle');
   String get getYourIdSubtitle => _s('getYourIdSubtitle');
   String get credential => _s('credential');
   String get issuer => _s('issuer');
   String get whatYouGet => _s('whatYouGet');
+  String get whatYouGetHint => _s('whatYouGetHint');
+  String get issuerVerified => _s('issuerVerified');
+  String get keyRequiredFirst => _s('keyRequiredFirst');
   String get requestCredential => _s('requestCredential');
   String get issuingTitle => _s('issuingTitle');
   String get stepAuthorize => _s('stepAuthorize');
@@ -151,27 +145,27 @@ class AppStrings {
   String get stepStore => _s('stepStore');
   String get credentialIssued => _s('credentialIssued');
 
-  // ── 10. QR scan ─────────────────────────────────────────────────────────
+  // ── 9. QR scan ──────────────────────────────────────────────────────────
   String get scanTitle => _s('scanTitle');
   String get scanSubtitle => _s('scanSubtitle');
   String get havingTrouble => _s('havingTrouble');
   String get cameraPlaceholder => _s('cameraPlaceholder');
   String get simulateScan => _s('simulateScan');
 
-  // ── 11. Review request ──────────────────────────────────────────────────
+  // ── 10. Review request ──────────────────────────────────────────────────
   String get reviewTitle => _s('reviewTitle');
   String get requestFrom => _s('requestFrom');
   String get theyRequest => _s('theyRequest');
   String get viewDetails => _s('viewDetails');
   String get verifierVerified => _s('verifierVerified');
 
-  // ── 12. Select credential ───────────────────────────────────────────────
+  // ── 11. Select credential ───────────────────────────────────────────────
   String get chooseCredentialTitle => _s('chooseCredentialTitle');
   String get chooseCredentialSubtitle => _s('chooseCredentialSubtitle');
   String get issuedBy => _s('issuedBy');
   String validUntil(String date) => _s('validUntil').replaceFirst('{d}', date);
 
-  // ── 13. Confirm & share ─────────────────────────────────────────────────
+  // ── 12. Confirm & share ─────────────────────────────────────────────────
   String get confirmShareTitle => _s('confirmShareTitle');
   String confirmShareSubtitle(String verifier) =>
       _s('confirmShareSubtitle').replaceFirst('{v}', verifier);
@@ -180,12 +174,12 @@ class AppStrings {
   String get consentRequired => _s('consentRequired');
   String get sentSecurely => _s('sentSecurely');
 
-  // ── 14. Reading data ────────────────────────────────────────────────────
+  // ── 13. Reading data ────────────────────────────────────────────────────
   String get readingTitle => _s('readingTitle');
   String get readingSubtitle => _s('readingSubtitle');
   String get pleaseWait => _s('pleaseWait');
 
-  // ── 15. Verification result ─────────────────────────────────────────────
+  // ── 14. Verification result ─────────────────────────────────────────────
   String get verifiedTitle => _s('verifiedTitle');
   String get verifiedSubtitle => _s('verifiedSubtitle');
   String get verificationStatus => _s('verificationStatus');
@@ -239,6 +233,7 @@ class AppStrings {
     'decline': 'ငြင်းပယ်ရန်',
     'share': 'မျှဝေရန်',
     'skip': 'ကျော်သွားရန်',
+    'change': 'ပြောင်းရန်',
     'needHelp': 'အကူအညီ လိုအပ်ပါသလား?',
     'security': 'လုံခြုံရေး',
     'stepOf': 'အဆင့် {a} / {b}',
@@ -252,7 +247,7 @@ class AppStrings {
 
     'registerMethodTitle': 'မည်သည့်နည်းဖြင့် စာရင်းသွင်းလိုပါသလဲ?',
     'registerMethodSubtitle':
-        'သင့်အတွက် အဆင်ပြေဆုံး နည်းလမ်းတစ်ခုကို ရွေးချယ်ပါ။ နောက်ပိုင်းတွင် ပြောင်းလဲနိုင်ပါသည်။',
+        'သင့်အတွက် အဆင်ပြေဆုံး နည်းလမ်းတစ်ခုကို ရွေးချယ်ပြီး အချက်အလက် ဖြည့်သွင်းပါ။',
     'methodPhone': 'ဖုန်းနံပါတ်ဖြင့်',
     'methodPhoneDesc': 'အတည်ပြုကုဒ်ကို SMS ဖြင့် ပေးပို့ပါမည်။',
     'methodEmail': 'အီးမေးလ်ဖြင့်',
@@ -261,28 +256,19 @@ class AppStrings {
     'methodUidDesc':
         'မှတ်ပုံတင်နံပါတ်ဖြင့် စာရင်းသွင်းပါ။ အစိုးရ မှတ်တမ်းနှင့် တိုက်ဆိုင် စစ်ဆေးပါမည်။',
     'recommended': 'အကြံပြုထားသည်',
-
-    'eidRegTitle': 'EID စာရင်းသွင်းမှု ဖြည့်စွက်ပါ',
-    'eidRegSubtitle':
-        'အောက်ပါ အချက်အလက်များသည် သင့်မှတ်ပုံတင် မှတ်တမ်းနှင့် တူညီရပါမည်။',
-    'fieldNameMy': 'အမည် အပြည့်အစုံ (မြန်မာ)',
-    'fieldNameEn': 'အမည် အပြည့်အစုံ (အင်္ဂလိပ်)',
-    'fieldDob': 'မွေးသက္ကရာဇ်',
     'fieldPhone': 'ဖုန်းနံပါတ်',
     'fieldEmail': 'အီးမေးလ်လိပ်စာ',
     'fieldUid': 'မှတ်ပုံတင်အမှတ် (UID)',
-    'hintNameMy': 'ဥပမာ — အောင်ကိုကို',
-    'hintNameEn': 'e.g. Aung Ko Ko',
     'hintUid': '12/ABC(N)123456',
     'errRequired': 'ဤအချက်အလက်ကို ဖြည့်သွင်းရန် လိုအပ်ပါသည်။',
     'errPhone': 'ဖုန်းနံပါတ်ကို မှန်ကန်စွာ ထည့်သွင်းပါ။',
     'errEmail': 'အီးမေးလ်လိပ်စာကို မှန်ကန်စွာ ထည့်သွင်းပါ။',
     'errUid': 'မှတ်ပုံတင်အမှတ် ပုံစံ မမှန်ပါ။ ဥပမာ — 12/ABC(N)123456',
-    'errNameEn': 'အင်္ဂလိပ်စာလုံးဖြင့်သာ ရေးသားပါ။',
-    'selectDate': 'ရက်စွဲ ရွေးရန်',
 
     'otpTitle': 'သင့်ဖုန်းနံပါတ်ကို အတည်ပြုပါ',
-    'otpSubtitle': '{t} သို့ ဂဏန်း ၆ လုံးပါ ကုဒ်တစ်ခု ပေးပို့လိုက်ပါသည်။',
+    'otpTitleEmail': 'သင့်အီးမေးလ်ကို အတည်ပြုပါ',
+    'otpSentTo': 'ကုဒ် ပေးပို့သည့်နေရာ',
+    'otpHint': 'ဂဏန်း ၆ လုံးပါ ကုဒ်ကို ရိုက်ထည့်ပါ။',
     'resendCode': 'ကုဒ် ပြန်ပို့ရန်',
     'resendIn': '{t} အကြာတွင် ပြန်ပို့နိုင်ပါမည်',
     'verify': 'အတည်ပြုရန်',
@@ -293,16 +279,15 @@ class AppStrings {
     'pinConfirmTitle': 'PIN ကို ထပ်မံ ရိုက်ထည့်ပါ',
     'pinConfirmSubtitle': 'အတည်ပြုရန် PIN ကို နောက်တစ်ကြိမ် ရိုက်ထည့်ပါ။',
     'errPinMismatch': 'PIN နှစ်ခု မတူညီပါ။ ပြန်လည် ကြိုးစားပါ။',
-    'bioTitle': 'မြန်ဆန်စွာ ဝင်ရောက်ရန် Biometrics ဖွင့်ပါ',
-    'bioSubtitle':
-        'လက်ဗွေ သို့မဟုတ် မျက်နှာဖြင့် Wallet ကို လျင်မြန်စွာ ဖွင့်နိုင်ပါသည်။ PIN ကိုလည်း အချိန်မရွေး ဆက်လက် သုံးနိုင်ပါသည်။',
-    'bioEnable': 'ယခု ဖွင့်မည်',
-    'bioSkip': 'ယခု မလုပ်သေးပါ',
-    'bioFaceTouch': 'Touch ID / Face ID',
+    'errPinWeak': 'ခန့်မှန်းရ လွယ်ကူလွန်းပါသည်။ အခြား PIN တစ်ခု ရွေးချယ်ပါ။',
+    'pinNeverShare': 'သင့် PIN ကို မည်သူ့ကိုမျှ မပြောပြပါနှင့်။',
 
     'readyTitle': 'သင့် Wallet အဆင်သင့် ဖြစ်ပါပြီ!',
     'readySubtitle':
-        'ဒစ်ဂျစ်တယ် အထောက်အထားများကို လုံခြုံစွာ လက်ခံ၍ သိမ်းဆည်းနိုင်ပါပြီ။',
+        'အခြေခံ စာရင်းသွင်းမှု ပြီးဆုံးပါပြီ။ နောက်တစ်ဆင့်အဖြစ် သင့်လုံခြုံရေး သော့ကို ဖန်တီးပါမည်။',
+    'readyStepPhone': 'ဖုန်းနံပါတ် အတည်ပြုပြီး',
+    'readyStepPin': 'လုံခြုံရေး PIN သတ်မှတ်ပြီး',
+    'secureWalletCta': 'Wallet ကို လုံခြုံအောင် ပြုလုပ်ရန်',
     'goToWalletHome': 'Wallet Home သို့ သွားရန်',
 
     'keyIntroTitle': 'သင့် Wallet ကို လုံခြုံအောင် ပြုလုပ်ခြင်း',
@@ -331,6 +316,10 @@ class AppStrings {
     'credential': 'အထောက်အထား',
     'issuer': 'ထုတ်ပေးသူ',
     'whatYouGet': 'ပါဝင်မည့် အချက်အလက်များ',
+    'whatYouGetHint':
+        'ဤတန်ဖိုးများအတိုင်း ထုတ်ပေးသူက လက်မှတ်ရေးထိုး ထုတ်ပေးပါမည်။',
+    'issuerVerified': 'အတည်ပြုပြီး ထုတ်ပေးသူ',
+    'keyRequiredFirst': 'အထောက်အထား မတောင်းခံမီ သော့ကို အရင်ဖန်တီးပါ။',
     'requestCredential': 'အထောက်အထား တောင်းခံရန်',
     'issuingTitle': 'သင့်အထောက်အထားကို ဖန်တီးနေပါသည်',
     'stepAuthorize': 'ထုတ်ပေးသူထံ ခွင့်ပြုချက် တောင်းခံခြင်း',
@@ -419,6 +408,7 @@ class AppStrings {
     'decline': 'Decline',
     'share': 'Share',
     'skip': 'Skip',
+    'change': 'Change',
     'needHelp': 'Need help?',
     'security': 'Security',
     'stepOf': 'Step {a} of {b}',
@@ -433,7 +423,7 @@ class AppStrings {
 
     'registerMethodTitle': 'How would you like to register?',
     'registerMethodSubtitle':
-        'Pick whichever is easiest for you. You can change this later.',
+        'Pick whichever is easiest for you, then enter your details.',
     'methodPhone': 'Phone Number',
     'methodPhoneDesc': 'We will send a one-time code by SMS.',
     'methodEmail': 'Email Address',
@@ -442,28 +432,19 @@ class AppStrings {
     'methodUidDesc':
         'Register with your national ID number. We will match it against the government record.',
     'recommended': 'Recommended',
-
-    'eidRegTitle': 'Complete EID Registration',
-    'eidRegSubtitle':
-        'These details must match the record on your national ID card.',
-    'fieldNameMy': 'Full Name (Myanmar)',
-    'fieldNameEn': 'Full Name (English)',
-    'fieldDob': 'Date of Birth',
     'fieldPhone': 'Phone Number',
     'fieldEmail': 'Email Address',
     'fieldUid': 'UID Number',
-    'hintNameMy': 'e.g. အောင်ကိုကို',
-    'hintNameEn': 'e.g. Aung Ko Ko',
     'hintUid': '12/ABC(N)123456',
     'errRequired': 'This field is required.',
     'errPhone': 'Enter a valid phone number.',
     'errEmail': 'Enter a valid email address.',
     'errUid': 'Invalid UID format. Example: 12/ABC(N)123456',
-    'errNameEn': 'Use Latin letters only.',
-    'selectDate': 'Select date',
 
     'otpTitle': 'Verify your phone number',
-    'otpSubtitle': 'We sent a 6-digit code to {t}.',
+    'otpTitleEmail': 'Verify your email address',
+    'otpSentTo': 'Code sent to',
+    'otpHint': 'Enter the 6-digit code.',
     'resendCode': 'Resend code',
     'resendIn': 'Resend code in {t}',
     'verify': 'Verify',
@@ -474,16 +455,15 @@ class AppStrings {
     'pinConfirmTitle': 'Re-enter your PIN',
     'pinConfirmSubtitle': 'Enter the PIN once more to confirm it.',
     'errPinMismatch': 'The two PINs do not match. Please try again.',
-    'bioTitle': 'Enable Biometrics for faster access',
-    'bioSubtitle':
-        'Unlock your wallet with your fingerprint or face. Your PIN keeps working at any time.',
-    'bioEnable': 'Enable Now',
-    'bioSkip': 'Not now',
-    'bioFaceTouch': 'Touch ID / Face ID',
+    'errPinWeak': 'That PIN is too easy to guess. Please choose another.',
+    'pinNeverShare': 'Never share your PIN with anyone.',
 
     'readyTitle': 'Your Wallet is Ready!',
     'readySubtitle':
-        'You can now securely receive and store your verifiable credentials.',
+        'Basic registration is complete. Next we will create the security key that protects your credentials.',
+    'readyStepPhone': 'Phone number verified',
+    'readyStepPin': 'Secure PIN created',
+    'secureWalletCta': 'Secure your wallet',
     'goToWalletHome': 'Go to Wallet Home',
 
     'keyIntroTitle': 'Securing your Wallet',
@@ -513,6 +493,10 @@ class AppStrings {
     'credential': 'Credential',
     'issuer': 'Issuer',
     'whatYouGet': 'What you will get',
+    'whatYouGetHint':
+        'These are the exact values the issuer will sign into your credential.',
+    'issuerVerified': 'Verified issuer',
+    'keyRequiredFirst': 'Create it first to bind your credential.',
     'requestCredential': 'Request Credential',
     'issuingTitle': 'Creating your credential',
     'stepAuthorize': 'Requesting authorization from the issuer',

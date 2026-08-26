@@ -53,7 +53,7 @@ class _UnlockScreenState extends State<UnlockScreen> {
       if (!wallet.isRegistered || wallet.verifyPin(entered)) {
         _unlock();
       } else {
-        _pin.fail();
+        _pin.fail(PinError.mismatch);
       }
     });
   }

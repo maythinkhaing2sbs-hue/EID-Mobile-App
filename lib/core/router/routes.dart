@@ -10,11 +10,9 @@ import '../../features/presentation/confirm_share_screen.dart';
 import '../../features/presentation/qr_scan_screen.dart';
 import '../../features/presentation/review_request_screen.dart';
 import '../../features/presentation/select_credential_screen.dart';
-import '../../features/registration/eid_registration_screen.dart';
 import '../../features/registration/otp_screen.dart';
 import '../../features/registration/registration_method_screen.dart';
 import '../../features/registration/wallet_ready_screen.dart';
-import '../../features/security/biometrics_screen.dart';
 import '../../features/security/pin_setup_screen.dart';
 import '../../features/security/unlock_screen.dart';
 import '../../features/verifier/reading_data_screen.dart';
@@ -33,10 +31,8 @@ abstract final class Routes {
 
   // Registration
   static const registerMethod = '/register/method';
-  static const registerEid = '/register/eid';
   static const registerOtp = '/register/otp';
   static const securityPin = '/security/pin';
-  static const securityBiometrics = '/security/biometrics';
   static const walletReady = '/wallet/ready';
 
   // Holder key
@@ -73,14 +69,10 @@ abstract final class Routes {
 
       case registerMethod:
         return page(const RegistrationMethodScreen());
-      case registerEid:
-        return page(const EidRegistrationScreen());
       case registerOtp:
         return page(const OtpScreen());
       case securityPin:
         return page(const PinSetupScreen());
-      case securityBiometrics:
-        return page(const BiometricsScreen());
       case walletReady:
         return page(const WalletReadyScreen());
 

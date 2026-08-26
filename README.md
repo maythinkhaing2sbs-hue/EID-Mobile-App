@@ -88,29 +88,32 @@ break, and clipping is worse for a low-vision user than a smaller cap.
 | # | Screen | File |
 |---|---|---|
 | 1 | Welcome | `features/onboarding/welcome_screen.dart` |
-| 2 | Registration method | `features/registration/registration_method_screen.dart` |
-| 3 | EID registration form | `features/registration/eid_registration_screen.dart` |
-| 4 | Verify OTP | `features/registration/otp_screen.dart` |
-| 5 | Create PIN → confirm | `features/security/pin_setup_screen.dart` |
-| 5b | Enable biometrics | `features/security/biometrics_screen.dart` |
-| 6 | Wallet ready | `features/registration/wallet_ready_screen.dart` |
-| 7 | Create holder key pair | `features/keys/create_key_pair_screen.dart` |
-| 8 | Key pair created | `features/keys/key_pair_created_screen.dart` |
-| 9 | Request credential | `features/credential/request_credential_screen.dart` |
-| 9b | Issuing → credential issued | `features/credential/credential_issuing_screen.dart` |
-| 10 | QR scan | `features/presentation/qr_scan_screen.dart` |
-| 11 | Review request | `features/presentation/review_request_screen.dart` |
-| 12 | Select credential | `features/presentation/select_credential_screen.dart` |
-| 13 | Confirm & share | `features/presentation/confirm_share_screen.dart` |
-| 14 | Bank — reading data | `features/verifier/reading_data_screen.dart` |
-| 15 | Bank — verification result | `features/verifier/verification_result_screen.dart` |
+| 2 | Registration — method + identifier | `features/registration/registration_method_screen.dart` |
+| 3 | Verify OTP | `features/registration/otp_screen.dart` |
+| 4 | Create PIN → confirm | `features/security/pin_setup_screen.dart` |
+| 5 | Wallet ready | `features/registration/wallet_ready_screen.dart` |
+| 6 | Securing your wallet (create key pair) | `features/keys/create_key_pair_screen.dart` |
+| 7 | Key pair created | `features/keys/key_pair_created_screen.dart` |
+| 8 | Request credential | `features/credential/request_credential_screen.dart` |
+| 8b | Issuing → credential issued | `features/credential/credential_issuing_screen.dart` |
+| 9 | QR scan | `features/presentation/qr_scan_screen.dart` |
+| 10 | Review request | `features/presentation/review_request_screen.dart` |
+| 11 | Select credential | `features/presentation/select_credential_screen.dart` |
+| 12 | Confirm & share | `features/presentation/confirm_share_screen.dart` |
+| 13 | Bank — reading data | `features/verifier/reading_data_screen.dart` |
+| 14 | Bank — verification result | `features/verifier/verification_result_screen.dart` |
 | — | Wallet home | `features/home/wallet_home_screen.dart` |
 | — | Unlock (existing wallet) | `features/security/unlock_screen.dart` |
 
-Two screens beyond the original fifteen exist because the flow is not walkable
-without them: **wallet home**, which every flow starts or ends at, and
-**unlock**, the destination of "Sign In with Existing Wallet". Screens 5b and 9b
-are the second halves of designed screens 5 and 9 respectively.
+Onboarding runs Welcome → method+identifier → OTP → PIN → Wallet ready →
+**Securing your wallet** → Key pair created → Home. The wallet is not usable
+until the holder key exists, so "Wallet ready" hands straight over to key
+creation rather than dropping the user at a home screen that can receive
+nothing.
+
+Two screens beyond the numbered flow exist because it is not walkable without
+them: **wallet home**, which every flow starts or ends at, and **unlock**, the
+destination of "Sign In with Existing Wallet".
 
 ### Notable interaction decisions
 
@@ -118,15 +121,29 @@ are the second halves of designed screens 5 and 9 respectively.
   above the fold — a citizen who opens the app in the wrong language has to be
   able to fix that before reading anything else. Elsewhere it is a compact
   app-bar control.
+- **Method and identifier share one screen.** Choosing "Phone" and supplying a
+  phone number is one decision; splitting it across two screens made the user
+  commit before seeing what it cost them. The field expands under the chosen
+  card, and switching method clears it — a phone number left in an email field
+  would otherwise be submitted as an address.
 - **PIN set and confirm share one screen.** Pushing a second route would let
   Back strand the user in a half-set PIN.
+- **Obvious PINs are refused.** `111111`, `123456`, `654321` and every other
+  repeat or straight run are rejected before the confirm stage
+  (`PinController.isWeak`). A national ID wallet that accepts `123456` is not
+  protecting anyone.
+- **The OTP screen shows where the code went, with a Change action.** A
+  mistyped digit is the commonest way this screen dead-ends, and a back arrow
+  does not read as "fix the number". The masked number preserves length —
+  a mask that drops digits shows the user a number that is not theirs.
+- **"Wallet ready" is a hand-off, not an ending.** Without a holder key the
+  wallet can receive nothing, so the screen lists what is done, what remains,
+  and its single action carries the user into key creation.
 - **Consent is a checkbox, not a button.** On Confirm & Share the actual claim
   *values* are shown, and Share stays disabled until the box is ticked — a
   button labelled "Share" is not by itself a record of informed consent.
 - **Decline is always reachable.** Red text button, full height, next to
   Continue — never buried or styled as an afterthought.
-- **Biometrics is offered, never pressured.** "Not now" is equally reachable
-  and the PIN keeps working.
 - **Issuance shows named steps, not a spinner.** Authorize → consent → bind key
   → sign → store. A user told what is happening waits; a user watching an
   anonymous spinner force-quits.
@@ -186,7 +203,7 @@ does not change any UI file.
 | Verification | `ReadingDataScreen` / `VerificationResultScreen` | Real signature, issuer-cert, integrity, device-auth and status-list checks |
 | QR camera | `ScannerFrame.preview` + `QrScanScreen._onDetected` | A scanner plugin's preview widget; forward the decoded request URI to `_onDetected` |
 | PIN storage | `WalletState.setPin` | Hash + hardware-backed secure storage. **The PIN is currently held in memory in plain text** |
-| Biometrics | `BiometricsScreen._finish` | `local_auth`; the screen only records the user's choice today |
+| Biometrics | `WalletState.setBiometrics` | `local_auth`. There is no biometric enrolment screen; the unlock keypad shows its biometric key only when the flag is set, which today happens only for the seeded demo session |
 
 The QR screen carries a **"Simulate a successful scan"** button so the
 presentation flow is walkable before a camera plugin is wired up. Remove it with
@@ -200,11 +217,12 @@ so the error state is reachable during review.
 ## Tests
 
 ```
-flutter test          # 29 tests
+flutter test          # 34 tests
 flutter analyze       # clean
 ```
 
-Covers UID/email/phone/name validators, form validation and input formatting,
+Covers UID/email/phone validators, the registration screen's method-and-identifier
+coupling, weak-PIN rejection, phone-mask integrity,
 locale-table integrity, the language toggle, consent gating on Confirm & Share,
 credential eligibility on Select Credential, `PinController`, and `WalletState`.
 
@@ -214,6 +232,6 @@ credential eligibility on Select Credential, `PinController`, and `WalletState`.
 flutter test tool/screenshots_test.dart --update-goldens
 ```
 
-Renders all 18 screens in both languages to `tool/goldens/{my,en}/`. These are
+Renders all 16 screens in both languages to `tool/goldens/{my,en}/`. These are
 review artefacts, not golden assertions — text rasterisation differs per
 platform, so running without `--update-goldens` is expected to fail.

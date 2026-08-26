@@ -1,9 +1,11 @@
 import 'package:eid_wallet/core/models/wallet_models.dart';
 import 'package:eid_wallet/core/models/wallet_state.dart';
 import 'package:eid_wallet/features/onboarding/welcome_screen.dart';
-import 'package:eid_wallet/features/registration/eid_registration_screen.dart';
 import 'package:eid_wallet/features/registration/registration_method_screen.dart';
+import 'package:eid_wallet/features/registration/wallet_ready_screen.dart';
+import 'package:eid_wallet/features/security/pin_setup_screen.dart';
 import 'package:eid_wallet/widgets/app_text_field.dart';
+import 'package:eid_wallet/widgets/pin_pad.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -34,11 +36,6 @@ void main() {
       expect(Validators.isPhone('9 123 456 789'), isTrue);
       expect(Validators.isPhone('12'), isFalse);
     });
-
-    test('English name field rejects non-Latin input', () {
-      expect(Validators.isLatinName('Aung Ko Ko'), isTrue);
-      expect(Validators.isLatinName('အောင်ကိုကို'), isFalse);
-    });
   });
 
   group('Welcome screen', () {
@@ -54,8 +51,8 @@ void main() {
     });
   });
 
-  group('Registration method screen', () {
-    testWidgets('Continue stays disabled until a method is chosen',
+  group('Registration screen', () {
+    testWidgets('Continue is blocked until a method and identifier are given',
         (tester) async {
       await setPhoneSurface(tester);
       await tester.pumpWidget(wrapScreen(const RegistrationMethodScreen()));
@@ -63,18 +60,85 @@ void main() {
       final button = find.widgetWithText(FilledButton, my.continueLabel);
       expect(tester.widget<FilledButton>(button).onPressed, isNull);
 
-      // The third card sits below the fold on a 390×844 device, so scroll it
-      // into view the way a user would before tapping.
+      // Choosing a method alone is not enough — the field it reveals is empty.
+      await tester.tap(find.text(my.methodPhone));
+      await tester.pumpAndSettle();
+      expect(tester.widget<FilledButton>(button).onPressed, isNull);
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, my.fieldPhone),
+        '9 123 456 789',
+      );
+      await tester.pumpAndSettle();
+      expect(tester.widget<FilledButton>(button).onPressed, isNotNull);
+    });
+
+    testWidgets('reveals the field belonging to the chosen method',
+        (tester) async {
+      await setPhoneSurface(tester);
+      await tester.pumpWidget(wrapScreen(const RegistrationMethodScreen()));
+
+      await tester.tap(find.text(my.methodEmail));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(TextFormField, my.fieldEmail), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, my.fieldPhone), findsNothing);
+
+      await tester.tap(find.text(my.methodPhone));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(TextFormField, my.fieldPhone), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, my.fieldEmail), findsNothing);
+    });
+
+    testWidgets('switching method clears the previous identifier',
+        (tester) async {
+      await setPhoneSurface(tester);
+      await tester.pumpWidget(wrapScreen(const RegistrationMethodScreen()));
+
+      await tester.tap(find.text(my.methodPhone));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, my.fieldPhone),
+        '9 123 456 789',
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(my.methodEmail));
+      await tester.pumpAndSettle();
+
+      // A phone number left sitting in the email field would be submitted as
+      // an email address.
+      expect(find.text('9 123 456 789'), findsNothing);
+      final button = find.widgetWithText(FilledButton, my.continueLabel);
+      expect(tester.widget<FilledButton>(button).onPressed, isNull);
+    });
+
+    testWidgets('rejects a malformed identifier inline', (tester) async {
+      await setPhoneSurface(tester);
+      await tester.pumpWidget(wrapScreen(const RegistrationMethodScreen()));
+
       final uidCard = find.text(my.methodUid);
       await tester.ensureVisible(uidCard);
       await tester.pumpAndSettle();
       await tester.tap(uidCard);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
-      expect(tester.widget<FilledButton>(button).onPressed, isNotNull);
+      final field = find.widgetWithText(TextFormField, my.fieldUid);
+      await tester.enterText(field, '12/ABC123');
+      await tester.pumpAndSettle();
+      expect(find.text(my.errUid), findsOneWidget);
+
+      await tester.enterText(field, '12/abc(n)123456');
+      await tester.pumpAndSettle();
+      expect(find.text(my.errUid), findsNothing);
+
+      // The formatter uppercases as the user types.
+      final editable = tester.widget<EditableText>(
+        find.descendant(of: field, matching: find.byType(EditableText)),
+      );
+      expect(editable.controller.text, '12/ABC(N)123456');
     });
 
-    testWidgets('records the chosen method on the draft', (tester) async {
+    testWidgets('records method and identifier on the draft', (tester) async {
       await setPhoneSurface(tester);
       final wallet = WalletState();
       await tester.pumpWidget(
@@ -82,103 +146,100 @@ void main() {
       );
 
       await tester.tap(find.text(my.methodEmail));
-      await tester.pump();
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.widgetWithText(TextFormField, my.fieldEmail),
+        'aung.ko@example.com',
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, my.continueLabel));
       await tester.pumpAndSettle();
 
       expect(wallet.draft.method, RegistrationMethod.email);
+      expect(wallet.draft.email, 'aung.ko@example.com');
+
+      // Continue lands on the OTP screen, which starts a 45-second resend
+      // countdown; drain it so no timer is pending at teardown.
+      for (var i = 0; i < 50; i++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
     });
   });
 
-  group('EID registration form', () {
-    testWidgets('surfaces an error for every empty required field',
+  group('PIN setup', () {
+    Future<void> enter(WidgetTester tester, String pin) async {
+      for (final digit in pin.split('')) {
+        await tester.tap(find.widgetWithText(GestureDetector, digit).first);
+        await tester.pump();
+      }
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('refuses an obvious PIN before asking for confirmation',
         (tester) async {
       await setPhoneSurface(tester);
-      await tester.pumpWidget(wrapScreen(const EidRegistrationScreen()));
+      await tester.pumpWidget(wrapScreen(const PinSetupScreen()));
 
-      await tester.tap(find.widgetWithText(FilledButton, my.next));
-      await tester.pumpAndSettle();
+      await enter(tester, '123456');
 
-      // Six required fields; the shared "required" message appears for the
-      // ones currently on screen.
-      expect(find.text(my.errRequired), findsWidgets);
+      expect(find.text(my.errPinWeak), findsOneWidget);
+      expect(find.text(my.pinConfirmTitle), findsNothing,
+          reason: 'a weak PIN must not advance to the confirm stage');
     });
 
-    testWidgets('rejects a Myanmar-script entry in the English name field',
+    testWidgets('advances to confirm, then reports a mismatch',
         (tester) async {
       await setPhoneSurface(tester);
-      await tester.pumpWidget(wrapScreen(const EidRegistrationScreen()));
+      await tester.pumpWidget(wrapScreen(const PinSetupScreen()));
 
-      await tester.enterText(
-        find.widgetWithText(TextFormField, my.fieldNameEn),
-        'အောင်ကိုကို',
-      );
-      await tester.pumpAndSettle();
+      await enter(tester, '481902');
+      expect(find.text(my.pinConfirmTitle), findsOneWidget);
 
-      expect(find.text(my.errNameEn), findsOneWidget);
+      await enter(tester, '481903');
+      expect(find.text(my.errPinMismatch), findsOneWidget);
     });
 
-    testWidgets('rejects a malformed UID and accepts a valid one',
-        (tester) async {
-      await setPhoneSurface(tester);
-      await tester.pumpWidget(wrapScreen(const EidRegistrationScreen()));
-
-      final uidField = find.widgetWithText(TextFormField, my.fieldUid);
-
-      await tester.enterText(uidField, '12/ABC123');
-      await tester.pumpAndSettle();
-      expect(find.text(my.errUid), findsOneWidget);
-
-      await tester.enterText(uidField, '12/ABC(N)123456');
-      await tester.pumpAndSettle();
-      expect(find.text(my.errUid), findsNothing);
-    });
-
-    testWidgets('opens the date picker and records the chosen date',
-        (tester) async {
-      // Regression: an app-wide clamp of minScaleFactor: 1 crashed this dialog.
-      // The date picker re-clamps its header to a max of exactly 1.0, which
-      // composed to min == max == 1.0 and tripped Flutter's own
-      // assert(maxScale > minScale). The clamp is now a ceiling only.
+    testWidgets('a matching confirmation stores the PIN', (tester) async {
       await setPhoneSurface(tester);
       final wallet = WalletState();
       await tester.pumpWidget(
-        wrapScreen(const EidRegistrationScreen(), wallet: wallet),
+        wrapScreen(const PinSetupScreen(), wallet: wallet),
       );
 
-      final dobField = find.widgetWithText(InputDecorator, my.fieldDob);
-      await tester.ensureVisible(dobField);
-      await tester.pumpAndSettle();
-      await tester.tap(dobField);
-      await tester.pumpAndSettle();
+      await enter(tester, '481902');
+      await enter(tester, '481902');
 
-      expect(find.byType(DatePickerDialog), findsOneWidget,
-          reason: 'tapping the date field must open the picker, not crash');
+      expect(wallet.isRegistered, isTrue);
+      expect(wallet.verifyPin('481902'), isTrue);
+    });
+  });
 
-      await tester.tap(find.text('OK'));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(DatePickerDialog), findsNothing);
-      // The picker defaults to 25 years ago; whatever it returned must have
-      // been written back to the field in ISO form.
-      final expected = DateField.format(DateTime(DateTime.now().year - 25));
-      expect(find.text(expected), findsOneWidget);
+  group('PinController.isWeak', () {
+    test('flags repeated digits and straight runs', () {
+      expect(PinController.isWeak('111111'), isTrue);
+      expect(PinController.isWeak('000000'), isTrue);
+      expect(PinController.isWeak('123456'), isTrue);
+      expect(PinController.isWeak('654321'), isTrue);
     });
 
-    testWidgets('uppercases UID input as it is typed', (tester) async {
+    test('accepts anything without an obvious pattern', () {
+      expect(PinController.isWeak('481902'), isFalse);
+      expect(PinController.isWeak('135790'), isFalse);
+      expect(PinController.isWeak('112233'), isFalse);
+    });
+  });
+
+  group('Wallet ready screen', () {
+    testWidgets('states what is done and what remains', (tester) async {
       await setPhoneSurface(tester);
-      await tester.pumpWidget(wrapScreen(const EidRegistrationScreen()));
+      await tester.pumpWidget(wrapScreen(const WalletReadyScreen()));
 
-      final uidField = find.widgetWithText(TextFormField, my.fieldUid);
-      await tester.enterText(uidField, '12/abc(n)123456');
-      await tester.pumpAndSettle();
-
-      // Asserted on the field's own controller: the hint text happens to be a
-      // sample UID too, so a plain find.text would match twice.
-      final editable = tester.widget<EditableText>(
-        find.descendant(of: uidField, matching: find.byType(EditableText)),
-      );
-      expect(editable.controller.text, '12/ABC(N)123456');
+      expect(find.text(my.readyTitle), findsOneWidget);
+      expect(find.text(my.readyStepPhone), findsOneWidget);
+      expect(find.text(my.readyStepPin), findsOneWidget);
+      // The action leads into key creation, not into the wallet: the wallet
+      // is not usable until the holder key exists.
+      expect(find.text(my.secureWalletCta), findsOneWidget);
     });
   });
 }

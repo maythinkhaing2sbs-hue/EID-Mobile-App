@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../core/theme/app_colors.dart';
-import '../core/theme/app_dimens.dart';
 import '../core/theme/app_typography.dart';
 
 /// Form field with a floating label.
@@ -10,13 +9,14 @@ import '../core/theme/app_typography.dart';
 /// Two details matter for this app specifically: [numeric] switches the *input*
 /// face to Roboto Slab (so a UID or phone number is read digit-by-digit even in
 /// the Myanmar locale), and validation is surfaced inline under the field
-/// rather than in a dialog, because a citizen filling six fields needs to see
-/// which one is wrong without losing the rest of the form.
+/// rather than in a dialog, because a citizen correcting a mistake needs to see
+/// which field is wrong without losing the rest of the form.
 class AppTextField extends StatelessWidget {
   const AppTextField({
     super.key,
     required this.label,
     this.controller,
+    this.focusNode,
     this.hint,
     this.helper,
     this.keyboardType,
@@ -31,10 +31,12 @@ class AppTextField extends StatelessWidget {
     this.autofillHints,
     this.maxLength,
     this.onChanged,
+    this.onFieldSubmitted,
   });
 
   final String label;
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   final String? hint;
   final String? helper;
   final TextInputType? keyboardType;
@@ -49,11 +51,13 @@ class AppTextField extends StatelessWidget {
   final Iterable<String>? autofillHints;
   final int? maxLength;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onFieldSubmitted;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      focusNode: focusNode,
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       validator: validator,
@@ -61,6 +65,7 @@ class AppTextField extends StatelessWidget {
       readOnly: readOnly,
       onTap: onTap,
       onChanged: onChanged,
+      onFieldSubmitted: onFieldSubmitted,
       autofillHints: autofillHints,
       maxLength: maxLength,
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -82,86 +87,11 @@ class AppTextField extends StatelessWidget {
   }
 }
 
-/// Read-only field that opens a date picker. Values render in the numeric face
-/// and in ISO order, which is how dates appear on the physical ID card.
-class DateField extends StatelessWidget {
-  const DateField({
-    super.key,
-    required this.label,
-    required this.value,
-    required this.onChanged,
-    this.validator,
-    this.hint,
-  });
-
-  final String label;
-  final DateTime? value;
-  final ValueChanged<DateTime> onChanged;
-  final String? Function(DateTime?)? validator;
-  final String? hint;
-
-  static String format(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-'
-      '${d.month.toString().padLeft(2, '0')}-'
-      '${d.day.toString().padLeft(2, '0')}';
-
-  @override
-  Widget build(BuildContext context) {
-    return FormField<DateTime>(
-      initialValue: value,
-      validator: validator,
-      builder: (field) {
-        // Keep the FormField's own value in step with the parent's.
-        if (field.value != value) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (field.mounted) field.didChange(value);
-          });
-        }
-
-        return InkWell(
-          borderRadius: Radii.fieldAll,
-          onTap: () async {
-            final now = DateTime.now();
-            final picked = await showDatePicker(
-              context: context,
-              initialDate: value ?? DateTime(now.year - 25),
-              firstDate: DateTime(1900),
-              lastDate: now,
-              initialEntryMode: DatePickerEntryMode.calendar,
-            );
-            if (picked != null) {
-              field.didChange(picked);
-              onChanged(picked);
-            }
-          },
-          child: InputDecorator(
-            isEmpty: value == null,
-            decoration: InputDecoration(
-              labelText: label,
-              hintText: hint,
-              errorText: field.errorText,
-              suffixIcon: const Icon(Icons.calendar_today_rounded,
-                  size: 18, color: AppColors.textTertiary),
-            ),
-            child: value == null
-                ? null
-                : Text(
-                    format(value!),
-                    style: AppTypography.numeric(
-                        size: 16, weight: FontWeight.w500, spacing: 0.3),
-                  ),
-          ),
-        );
-      },
-    );
-  }
-}
-
 /// Formatter for the Myanmar NRC/UID shape `12/ABC(N)123456`.
 ///
-/// Only uppercases and trims length; it deliberately does not force the
-/// punctuation, because township codes vary and fighting the user mid-typing
-/// is worse than validating once on submit.
+/// Only uppercases; it deliberately does not force the punctuation, because
+/// township codes vary and fighting the user mid-typing is worse than
+/// validating once the field loses focus.
 class UidInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -183,14 +113,12 @@ class UidInputFormatter extends TextInputFormatter {
 abstract final class Validators {
   static final RegExp _email = RegExp(r'^[\w.+-]+@[\w-]+\.[\w.-]+$');
   static final RegExp _phone = RegExp(r'^\+?[\d\s-]{7,15}$');
-  static final RegExp _latin = RegExp(r'^[A-Za-z\s.\-]+$');
 
-  /// `12/ABC(N)123456` — township digits, three-letter code, category letter,
-  /// six digits. Spaces are tolerated and stripped before matching.
+  /// `12/ABC(N)123456` — township digits, letter code, category letter, six
+  /// digits. Spaces are tolerated and stripped before matching.
   static final RegExp _uid = RegExp(r'^\d{1,2}/[A-Z]{2,10}\([A-Z]\)\d{6}$');
 
   static bool isEmail(String v) => _email.hasMatch(v.trim());
   static bool isPhone(String v) => _phone.hasMatch(v.trim());
-  static bool isLatinName(String v) => _latin.hasMatch(v.trim());
   static bool isUid(String v) => _uid.hasMatch(v.replaceAll(' ', '').trim());
 }
