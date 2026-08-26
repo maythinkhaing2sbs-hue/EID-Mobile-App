@@ -114,11 +114,16 @@ abstract final class Validators {
   static final RegExp _email = RegExp(r'^[\w.+-]+@[\w-]+\.[\w.-]+$');
   static final RegExp _phone = RegExp(r'^\+?[\d\s-]{7,15}$');
 
+  /// Latin letters only. Used to route a single typed name into the English or
+  /// the Myanmar slot on the credential, rather than asking for it twice.
+  static final RegExp _latin = RegExp(r'^[A-Za-z\s.\-]+$');
+
   /// `12/ABC(N)123456` — township digits, letter code, category letter, six
   /// digits. Spaces are tolerated and stripped before matching.
   static final RegExp _uid = RegExp(r'^\d{1,2}/[A-Z]{2,10}\([A-Z]\)\d{6}$');
 
   static bool isEmail(String v) => _email.hasMatch(v.trim());
   static bool isPhone(String v) => _phone.hasMatch(v.trim());
+  static bool isLatinName(String v) => _latin.hasMatch(v.trim());
   static bool isUid(String v) => _uid.hasMatch(v.replaceAll(' ', '').trim());
 }
