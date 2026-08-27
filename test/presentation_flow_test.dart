@@ -184,7 +184,17 @@ void main() {
       await wallet.issueCredential();
       await wallet.issueCredential();
 
-      expect(wallet.credentials.length, 1);
+      // The National ID plus the passport the wallet is assumed to already
+      // hold — stored once each, however often the flow is re-run.
+      expect(wallet.credentials.length, 2);
+      expect(
+        wallet.credentials.where((c) => c.kind == CredentialKind.nationalId),
+        hasLength(1),
+      );
+      expect(
+        wallet.credentials.where((c) => c.kind == CredentialKind.passport),
+        hasLength(1),
+      );
     });
 
     test('creating the holder key records a P-256 key', () async {

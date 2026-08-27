@@ -56,11 +56,26 @@ class WalletState extends ChangeNotifier {
   /// previews *this* object and [issueCredential] stores it, so what the user
   /// approves and what lands in the wallet can never disagree.
   WalletCredential get pendingNationalId =>
-      WalletCredential.sampleNationalId.withClaims({
+      WalletCredential.sampleNationalId.withClaims(_holderClaims);
+
+  /// The passport the demo wallet is assumed to already hold, carrying the same
+  /// holder details as the National ID.
+  ///
+  /// Nothing in these 15 screens issues a passport — it is the *second*
+  /// document, and without one the presentation flow's "Choose Credential" step
+  /// has nothing to choose between and the wallet home has nothing to page
+  /// through.
+  WalletCredential get holderPassport =>
+      WalletCredential.samplePassport.withClaims(_holderClaims);
+
+  /// Whatever the holder gave at registration, written over a sample record.
+  /// Applied to every credential the wallet hands out so two documents can
+  /// never disagree about whose they are.
+  Map<ClaimId, String> get _holderClaims => {
         ClaimId.fullName: displayName,
         if (draft.dateOfBirth case final dob?)
           ClaimId.dateOfBirth: _isoDate(dob),
-      });
+      };
 
   static String _isoDate(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-'
@@ -71,11 +86,21 @@ class WalletState extends ChangeNotifier {
   /// credential request carrying the holder public key as proof of possession.
   Future<WalletCredential> issueCredential() async {
     final credential = pendingNationalId;
+    _store(credential);
+    // The passport arrives with it. It is not issued by this flow — see
+    // [holderPassport] — but a wallet holding exactly one document turns every
+    // later "choose a credential" step into a formality.
+    _store(holderPassport);
+    notifyListeners();
+    return credential;
+  }
+
+  /// Adds a credential unless the wallet already holds that exact one, so a
+  /// re-run of the issuance flow updates nothing and duplicates nothing.
+  void _store(WalletCredential credential) {
     if (!credentials.any((c) => c.id == credential.id)) {
       credentials.add(credential);
     }
-    notifyListeners();
-    return credential;
   }
 
   /// Records a completed presentation on the holder's own audit trail.
