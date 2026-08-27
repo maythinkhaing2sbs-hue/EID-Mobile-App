@@ -244,8 +244,8 @@ class AppStrings {
   // Myanmar — the default language of the app.
   // ═══════════════════════════════════════════════════════════════════════
   static const Map<String, String> _my = {
-    'appName': 'အမျိုးသား EID Wallet',
-    'appNameShort': 'EID Wallet',
+    'appName': 'အမျိုးသား eID Wallet',
+    'appNameShort': 'eID Wallet',
     'languageName': 'မြန်မာ',
     'continue': 'ဆက်လုပ်ရန်',
     'back': 'နောက်သို့',
@@ -261,15 +261,15 @@ class AppStrings {
     'security': 'လုံခြုံရေး',
     'stepOf': 'အဆင့် {a} / {b}',
 
-    'welcomeTitle': 'National EID Wallet\nမှ ကြိုဆိုပါသည်',
-    'welcomeTitleAccent': 'National EID Wallet',
+    'welcomeTitle': 'National eID Wallet\nမှ ကြိုဆိုပါသည်',
+    'welcomeTitleAccent': 'National eID Wallet',
     'letsGetStarted': 'စတင်လိုက်ရအောင်!',
     'issuedByGovernment': 'ပြည်ထောင်စုသမ္မတမြန်မာနိုင်ငံတော်အစိုးရ မှ ထုတ်ပေးသည်',
 
     'authTabSignIn': 'ဝင်ရောက်ရန်',
     'authTabSignUp': 'အကောင့်ဖွင့်ရန်',
     'authSignInHeadline': 'ပြန်လည် ကြိုဆိုပါသည်',
-    'authSignInHeadlineSub': 'သင့် EID Wallet သို့ ဝင်ရောက်ပါ။',
+    'authSignInHeadlineSub': 'သင့် eID Wallet သို့ ဝင်ရောက်ပါ။',
     'authSignUpHeadline': 'အကောင့်အသစ် ဖန်တီးပါ',
     'authSignUpHeadlineSub': 'အချက်အလက် ဖြည့်၍ စတင်လိုက်ပါ။',
     'authSignUpDoneTitle': 'အကောင့် ဖွင့်ပြီးပါပြီ!',
@@ -362,7 +362,7 @@ class AppStrings {
     'stepStore': 'Wallet အတွင်း လုံခြုံစွာ သိမ်းဆည်းခြင်း',
     'credentialIssued': 'အထောက်အထား ထုတ်ပေးပြီးပါပြီ',
 
-    'scanTitle': 'ဘဏ်နှင့် အတည်ပြုရန် စကင်ဖတ်ပါ',
+    'scanTitle': 'ဘဏ်နှင့် အတည်ပြုရန် စကန်ဖတ်ပါ',
     'scanSubtitle': 'ဘဏ်၏ ဖန်သားပြင်ပေါ်ရှိ QR ကုဒ်ကို ဘောင်အတွင်း ချိန်ပါ။',
     'havingTrouble': 'အခက်အခဲ ရှိပါသလား?',
     'cameraPlaceholder': 'ကင်မရာ ကြည့်ကွင်း',
@@ -419,8 +419,8 @@ class AppStrings {
     'activityEmpty': 'မျှဝေမှု မှတ်တမ်း မရှိသေးပါ။',
     'myCredentials': 'ကျွန်ုပ်၏ အထောက်အထားများ',
     'quickActions': 'အမြန် လုပ်ဆောင်ချက်များ',
-    'actionScan': 'QR စကင်ဖတ်ရန်',
-    'actionAdd': 'အထောက်အထား ထည့်ရန်',
+    'actionScan': 'QR စကန်ဖတ်ရန်',
+    'actionAdd': 'အထောက်အထား ကြည့်ရန်',
     'actionSecurity': 'လုံခြုံရေး',
     'noCredentials': 'အထောက်အထား မရှိသေးပါ။',
 
@@ -437,7 +437,7 @@ class AppStrings {
   // ═══════════════════════════════════════════════════════════════════════
   static const Map<String, String> _en = {
     'appName': 'National Digital ID Wallet',
-    'appNameShort': 'EID Wallet',
+    'appNameShort': 'eID Wallet',
     'languageName': 'English',
     'continue': 'Continue',
     'back': 'Back',
@@ -613,7 +613,7 @@ class AppStrings {
     'myCredentials': 'My Credentials',
     'quickActions': 'Quick actions',
     'actionScan': 'Scan QR',
-    'actionAdd': 'Add credential',
+    'actionAdd': 'View credential',
     'actionSecurity': 'Security',
     'noCredentials': 'No credentials yet.',
 

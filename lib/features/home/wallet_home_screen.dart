@@ -30,7 +30,17 @@ class WalletHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
     final wallet = WalletScope.of(context);
-    final credentials = wallet.credentials;
+    // Home shows the National ID alone. The wallet also holds the passport —
+    // and offers it wherever a verifier's request is being answered — but this
+    // screen is the holder's own front door, and the one document the app
+    // exists to carry belongs there without a deck to swipe through.
+    //
+    // Falls back to everything held if there is no National ID, so a wallet
+    // that carries only a passport shows it rather than reading as empty.
+    final held = wallet.credentials;
+    final nationalIds =
+        held.where((c) => c.kind == CredentialKind.nationalId).toList();
+    final credentials = nationalIds.isEmpty ? held : nationalIds;
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -92,7 +102,7 @@ class WalletHomeScreen extends StatelessWidget {
                         Gap.w12,
                         Expanded(
                           child: _ActionCard(
-                            icon: Icons.add_card_rounded,
+                            icon: Icons.badge_rounded,
                             label: s.actionAdd,
                             onTap: () => Navigator.of(context)
                                 .pushNamed(Routes.credentialRequest),
@@ -261,7 +271,7 @@ class _CredentialDeckState extends State<_CredentialDeck> {
           // the same point size and wraps the credential name to a second line
           // where English keeps it on one. Fitting the English content exactly
           // overflows the moment the default locale renders.
-          height: 258,
+          height: 242,
           child: PageView.builder(
             controller: _controller,
             padEnds: true,

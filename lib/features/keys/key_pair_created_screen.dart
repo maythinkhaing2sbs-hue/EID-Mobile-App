@@ -116,9 +116,15 @@ class _KeyPairCreatedScreenState extends State<KeyPairCreatedScreen> {
       ..pushNamed(Routes.credentialRequest);
   }
 
+  /// `2026-08-27  09:11 AM`. The clock is 12-hour with the meridiem spelled
+  /// out: this string is read back to a support desk, and `09:11` alone is
+  /// ambiguous to anyone who does not think in 24-hour time.
   static String _formatDateTime(DateTime d) {
     String two(int v) => v.toString().padLeft(2, '0');
-    return '${d.year}-${two(d.month)}-${two(d.day)}  ${two(d.hour)}:${two(d.minute)}';
+    final hour = d.hour % 12 == 0 ? 12 : d.hour % 12;
+    final meridiem = d.hour < 12 ? 'AM' : 'PM';
+    return '${d.year}-${two(d.month)}-${two(d.day)}  '
+        '${two(hour)}:${two(d.minute)} $meridiem';
   }
 }
 

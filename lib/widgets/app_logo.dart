@@ -40,7 +40,7 @@ class AppLogo extends StatelessWidget {
       width: height * _aspect,
       fit: BoxFit.contain,
       filterQuality: FilterQuality.high,
-      semanticLabel: 'EID Wallet',
+      semanticLabel: 'eID Wallet',
       // A missing or undeclared asset must not blank the brand area.
       errorBuilder: (context, error, stack) => Icon(
         Icons.badge_outlined,

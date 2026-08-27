@@ -133,12 +133,6 @@ class _IssuerHeader extends StatelessWidget {
   /// The document, not the ministry behind it: the issuer is already named on
   /// the line below, so a building here would say the same thing twice and
   /// leave the card itself unillustrated.
-  static IconData _kindIcon(CredentialKind kind) => switch (kind) {
-        CredentialKind.nationalId => Icons.badge_rounded,
-        CredentialKind.passport => Icons.menu_book_rounded,
-        CredentialKind.driverLicense => Icons.directions_car_rounded,
-      };
-
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
@@ -159,7 +153,7 @@ class _IssuerHeader extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.22),
               ),
             ),
-            child: Icon(_kindIcon(credential.kind),
+            child: Icon(credential.kind.icon,
                 color: AppColors.textOnPrimary),
           ),
           Gap.w12,

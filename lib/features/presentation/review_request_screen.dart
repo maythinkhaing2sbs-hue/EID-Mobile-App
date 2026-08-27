@@ -107,7 +107,7 @@ class ReviewRequestScreen extends StatelessWidget {
                 Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: TextButton(
-                    onPressed: () => _showDetails(context),
+                    onPressed: () => _showDetails(context, preview),
                     style: TextButton.styleFrom(padding: EdgeInsets.zero),
                     child: Text(s.viewDetails),
                   ),
@@ -123,43 +123,67 @@ class ReviewRequestScreen extends StatelessWidget {
     );
   }
 
-  void _showDetails(BuildContext context) {
+  /// The record as the sheet prints it, in ID-card order. Address is on the
+  /// list although no verifier on this screen asks for it: the sheet answers
+  /// "what does this document say about me?", not "what is being sent?" - that
+  /// question is already answered by the card behind it.
+  static const List<ClaimId> _detailClaims = [
+    ClaimId.fullName,
+    ClaimId.dateOfBirth,
+    ClaimId.nationality,
+    ClaimId.documentNumber,
+    ClaimId.expiryDate,
+    ClaimId.address,
+  ];
+
+  /// The full record behind the request.
+  ///
+  /// The endpoint URL and protocol name that used to sit here were the two
+  /// facts on the screen no holder can act on - a `response_uri` tells someone
+  /// deciding whether to hand over their ID exactly nothing. What they can act
+  /// on is the document itself, so that is what the sheet shows.
+  void _showDetails(BuildContext context, WalletCredential? preview) {
     final s = AppStrings.of(context);
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
       backgroundColor: AppColors.surface,
+      isScrollControlled: true,
       builder: (_) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, Gap.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(s.viewDetails,
-                  style: Theme.of(context).textTheme.titleLarge),
-              Gap.h16,
-              KeyValueRow(label: s.requestFrom, value: request.verifierName),
-              const Divider(height: Gap.lg),
-              KeyValueRow(
-                label: 'response_uri',
-                value: 'https://${request.verifierDomain}/oid4vp/response',
-                numericValue: true,
-              ),
-              const Divider(height: Gap.lg),
-              KeyValueRow(
-                label: 'Protocol',
-                value: request.isProximity
-                    ? 'ISO 18013-5 (proximity)'
-                    : 'OpenID4VP over HTTPS',
-              ),
-              const Divider(height: Gap.lg),
-              KeyValueRow(
-                label: s.verificationStatus,
-                value: '${request.requestedClaims.length}',
-                numericValue: true,
-              ),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(s.viewDetails,
+                    style: Theme.of(context).textTheme.titleLarge),
+                Gap.h16,
+                KeyValueRow(label: s.requestFrom, value: request.verifierName),
+                const Divider(height: Gap.lg),
+                if (preview case final credential?) ...[
+                  for (final claim in _detailClaims)
+                    if (credential.claims[claim] case final value?) ...[
+                      KeyValueRow(
+                        label: claim.label(s),
+                        value: value,
+                        numericValue: claim.isTabular,
+                      ),
+                      const Divider(height: Gap.lg),
+                    ],
+                  KeyValueRow(
+                    label: s.issuer,
+                    value: credential.issuerName(s),
+                  ),
+                ] else
+                  KeyValueRow(
+                    label: s.theyRequest,
+                    value: '${request.requestedClaims.length}',
+                    numericValue: true,
+                  ),
+              ],
+            ),
           ),
         ),
       ),

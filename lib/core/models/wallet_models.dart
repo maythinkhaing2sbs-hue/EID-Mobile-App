@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../l10n/app_strings.dart';
 
 /// The claims a credential can carry. Using an enum rather than free strings
@@ -47,6 +49,18 @@ enum CredentialKind {
         CredentialKind.nationalId => s.credNationalId,
         CredentialKind.passport => s.credPassport,
         CredentialKind.driverLicense => s.credDriverLicense,
+      };
+
+  /// The glyph that stands for this document across the app.
+  ///
+  /// One definition, because the same passport is drawn on the wallet home, the
+  /// selection list, the consent screen and the verifier's receipt - and a
+  /// document that changes its icon between screens reads as a different
+  /// document.
+  IconData get icon => switch (this) {
+        CredentialKind.nationalId => Icons.badge_rounded,
+        CredentialKind.passport => Icons.menu_book_rounded,
+        CredentialKind.driverLicense => Icons.directions_car_rounded,
       };
 }
 
@@ -101,6 +115,11 @@ class WalletCredential {
       ClaimId.nationality: 'MMR',
       ClaimId.documentNumber: '12/ABC(N)123456',
       ClaimId.expiryDate: '2030-12-31',
+      // Held on the credential but not asked for by the bank KYC request. It
+      // is the holder's record, so the wallet's own detail sheet shows it even
+      // when no verifier has asked - and its absence from the consent list is
+      // then a visible fact rather than an omission.
+      ClaimId.address: 'No. 12, Bogyoke Aung San Rd, Yangon',
     },
   );
 
@@ -116,6 +135,7 @@ class WalletCredential {
       ClaimId.nationality: 'MMR',
       ClaimId.documentNumber: 'MB1234567',
       ClaimId.expiryDate: '2029-06-30',
+      ClaimId.address: 'No. 12, Bogyoke Aung San Rd, Yangon',
     },
   );
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Single source of truth for colour in the EID wallet.
+/// Single source of truth for colour in the eID wallet.
 ///
 /// The five brand values come straight from the design system; everything
 /// below them is a supporting neutral derived to keep contrast at or above

@@ -85,7 +85,7 @@ class _EidWalletAppState extends State<EidWalletApp> {
         child: ValueListenableBuilder<Locale>(
           valueListenable: _locale,
           builder: (context, locale, _) => MaterialApp(
-            title: 'National EID Wallet',
+            title: 'National eID Wallet',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light(locale),
             locale: locale,

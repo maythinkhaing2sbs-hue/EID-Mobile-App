@@ -528,7 +528,10 @@ class CredentialCard extends StatelessWidget {
                   ?.copyWith(color: Colors.white),
             ),
             if (!compact) ...[
-              Gap.h24,
+              // Tight against the document name above it: the two lines are one
+              // block - what this is, then whose it is - and the wide gap that
+              // used to sit here read as an empty field rather than as air.
+              Gap.h8,
               Text(
                 holder.toUpperCase(),
                 style: AppTypography.numeric(

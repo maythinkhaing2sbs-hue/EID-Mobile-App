@@ -6,7 +6,6 @@ import '../../core/models/wallet_state.dart';
 import '../../core/router/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
-import '../../core/theme/app_typography.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/cards.dart';
@@ -153,11 +152,7 @@ class _TransferCard extends StatelessWidget {
             title: credential.kind.label(s),
             subtitle: credential.issuerName(s),
           ),
-          _Hop(
-            label: request.isProximity
-                ? 'ISO 18013-5 · offline'
-                : 'OpenID4VP · HTTPS',
-          ),
+          const _Hop(),
           _FlowNode(
             leading: VerifierLogo(
               name: request.verifierName,
@@ -224,12 +219,6 @@ class _CredentialTile extends StatelessWidget {
 
   final CredentialKind kind;
 
-  IconData get _icon => switch (kind) {
-        CredentialKind.passport => Icons.menu_book_rounded,
-        CredentialKind.driverLicense => Icons.directions_car_rounded,
-        CredentialKind.nationalId => Icons.badge_rounded,
-      };
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -250,42 +239,46 @@ class _CredentialTile extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(_icon, size: 22, color: AppColors.textOnPrimary),
+      child: Icon(kind.icon, size: 22, color: AppColors.textOnPrimary),
     );
   }
 }
 
-/// The encrypted hop between the two nodes.
+/// The encrypted hop between the two nodes: a padlock sitting on the line the
+/// data travels down.
+///
+/// The protocol name that used to be spelled out beside it is gone. Whether the
+/// wire format is OpenID4VP or an ISO mdoc exchange changes nothing the holder
+/// can decide here, and the one thing they do need from this gap - that it is
+/// sealed - is what the padlock says.
 class _Hop extends StatelessWidget {
-  const _Hop({required this.label});
-
-  final String label;
+  const _Hop();
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return const SizedBox(
       height: 40,
-      child: Row(
-        children: [
-          const SizedBox(
-            width: 44,
-            child: Center(
-              child: CustomPaint(size: Size(9, 40), painter: _DashedHop()),
-            ),
+      child: SizedBox(
+        width: 44,
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              CustomPaint(size: Size(9, 40), painter: _DashedHop()),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  shape: BoxShape.circle,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 3),
+                  child: Icon(Icons.lock_rounded,
+                      size: 13, color: AppColors.textTertiary),
+                ),
+              ),
+            ],
           ),
-          Gap.w12,
-          const Icon(Icons.lock_rounded,
-              size: 13, color: AppColors.textTertiary),
-          Gap.w4,
-          Flexible(
-            child: Text(
-              label,
-              style: AppTypography.mono(size: 11, color: AppColors.textTertiary),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

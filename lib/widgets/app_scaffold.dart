@@ -237,27 +237,41 @@ class ScreenHeader extends StatelessWidget {
 
 /// Small uppercase-ish label above a group of content.
 class SectionLabel extends StatelessWidget {
-  const SectionLabel(this.text, {super.key, this.trailing});
+  const SectionLabel(this.text, {super.key, this.trailing, this.icon});
 
   final String text;
   final Widget? trailing;
 
+  /// Promotes the label to a titled heading: the icon is drawn in the brand
+  /// colour and the text goes dark and heavy. Used where the label names the
+  /// *document* rather than the section - "National ID Card" set like a caption
+  /// reads as a field label, and the reader loses which record they are looking
+  /// at.
+  final IconData? icon;
+
   @override
   Widget build(BuildContext context) {
+    final scale = AppTypography.forLocale(Localizations.localeOf(context));
+    final titled = icon != null;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: Gap.sm),
+      padding: EdgeInsets.only(bottom: titled ? Gap.md : Gap.sm),
       child: Row(
         children: [
+          if (icon case final glyph?) ...[
+            Icon(glyph, size: 18, color: AppColors.primary),
+            Gap.w8,
+          ],
           Expanded(
             child: Text(
               text,
-              style: AppTypography.forLocale(Localizations.localeOf(context))
-                  .labelMedium
-                  ?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.4,
-                  ),
+              style: titled
+                  ? scale.titleMedium?.copyWith(color: AppColors.textPrimary)
+                  : scale.labelMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.4,
+                    ),
             ),
           ),
           ?trailing,

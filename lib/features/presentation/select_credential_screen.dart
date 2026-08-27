@@ -204,12 +204,6 @@ class _CredentialOption extends StatelessWidget {
   final bool usable;
   final VoidCallback onTap;
 
-  IconData get _icon => switch (credential.kind) {
-        CredentialKind.passport => Icons.menu_book_rounded,
-        CredentialKind.driverLicense => Icons.directions_car_rounded,
-        CredentialKind.nationalId => Icons.badge_rounded,
-      };
-
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
@@ -262,7 +256,7 @@ class _CredentialOption extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _KindTile(icon: _icon, active: active),
+                        _KindTile(icon: credential.kind.icon, active: active),
                         Gap.w12,
                         Expanded(
                           child: Column(
