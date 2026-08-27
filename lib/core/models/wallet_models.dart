@@ -7,7 +7,11 @@ import '../l10n/app_strings.dart';
 /// apart on spelling, and every label is localised in exactly one place.
 enum ClaimId {
   fullName,
+  myanmarName,
+  fatherName,
   dateOfBirth,
+  gender,
+  bloodType,
   nationality,
   documentNumber,
   expiryDate,
@@ -16,7 +20,11 @@ enum ClaimId {
 
   String label(AppStrings s) => switch (this) {
         ClaimId.fullName => s.attrFullName,
+        ClaimId.myanmarName => s.attrMyanmarName,
+        ClaimId.fatherName => s.attrFatherName,
         ClaimId.dateOfBirth => s.attrDob,
+        ClaimId.gender => s.attrGender,
+        ClaimId.bloodType => s.attrBloodType,
         ClaimId.nationality => s.attrNationality,
         ClaimId.documentNumber => s.attrDocNumber,
         ClaimId.expiryDate => s.attrExpiry,
@@ -34,9 +42,16 @@ enum ClaimId {
         ClaimId.dateOfBirth ||
         ClaimId.nationality ||
         ClaimId.documentNumber ||
-        ClaimId.expiryDate =>
+        ClaimId.expiryDate ||
+        ClaimId.bloodType =>
           true,
-        ClaimId.fullName || ClaimId.address || ClaimId.photo => false,
+        ClaimId.fullName ||
+        ClaimId.myanmarName ||
+        ClaimId.fatherName ||
+        ClaimId.gender ||
+        ClaimId.address ||
+        ClaimId.photo =>
+          false,
       };
 }
 
@@ -111,7 +126,11 @@ class WalletCredential {
     validUntil: '2030-12-31',
     claims: {
       ClaimId.fullName: 'Aung Ko Ko',
+      ClaimId.myanmarName: 'အောင်ကိုကို',
+      ClaimId.fatherName: 'U Maung Maung',
       ClaimId.dateOfBirth: '1990-05-15',
+      ClaimId.gender: 'M',
+      ClaimId.bloodType: 'O+',
       ClaimId.nationality: 'MMR',
       ClaimId.documentNumber: '12/ABC(N)123456',
       ClaimId.expiryDate: '2030-12-31',
@@ -131,7 +150,11 @@ class WalletCredential {
     format: 'ISO 18013-5 mdoc',
     claims: {
       ClaimId.fullName: 'Aung Ko Ko',
+      ClaimId.myanmarName: 'အောင်ကိုကို',
+      ClaimId.fatherName: 'U Maung Maung',
       ClaimId.dateOfBirth: '1990-05-15',
+      ClaimId.gender: 'M',
+      ClaimId.bloodType: 'O+',
       ClaimId.nationality: 'MMR',
       ClaimId.documentNumber: 'MB1234567',
       ClaimId.expiryDate: '2029-06-30',
@@ -319,3 +342,103 @@ class RegistrationDraft {
 }
 
 enum RegistrationMethod { phone, email, uid }
+
+/// Where a submitted credential request has got to.
+enum CredentialRequestStatus { underReview, issued, rejected }
+
+/// A credential request that has been accepted by the issuer but not yet
+/// approved — the deferred half of OpenID4VCI.
+///
+/// A national ID is signed off by a person checking an application against the
+/// civil register, not by a server answering in 400ms. That takes days, and a
+/// wallet that shows nothing for those days reads as a failed request: the
+/// holder re-applies, or calls a support desk that has nothing to tell them.
+/// Modelling the request as an object the app can show is what turns the wait
+/// into a tracked thing with a reference number, a date, and an end.
+class CredentialRequest {
+  const CredentialRequest({
+    required this.reference,
+    required this.kind,
+    required this.issuerKey,
+    required this.submittedAt,
+    this.status = CredentialRequestStatus.underReview,
+    this.minWorkingDays = 2,
+    this.maxWorkingDays = 3,
+  });
+
+  /// What the holder quotes to a counter clerk. The one field on the screen
+  /// that exists for the support desk rather than for the holder.
+  final String reference;
+  final CredentialKind kind;
+
+  /// `'moha'` / `'mofa'` — resolved to a localised ministry name at render
+  /// time, exactly as on [WalletCredential].
+  final String issuerKey;
+  final DateTime submittedAt;
+  final CredentialRequestStatus status;
+
+  /// The quoted turnaround, as a range. A single number would be read as a
+  /// promise; a range is read as an estimate, which is what it is.
+  final int minWorkingDays;
+  final int maxWorkingDays;
+
+  String issuerName(AppStrings s) =>
+      issuerKey == 'mofa' ? s.issuerMofa : s.issuerMoha;
+
+  String get submittedDate => _isoDate(submittedAt);
+
+  /// The far end of the estimate, counted in working days so a request filed
+  /// on a Friday is not promised back on the Sunday.
+  String get expectedDate => _isoDate(_addWorkingDays(submittedAt, maxWorkingDays));
+
+  CredentialRequest copyWith({CredentialRequestStatus? status}) =>
+      CredentialRequest(
+        reference: reference,
+        kind: kind,
+        issuerKey: issuerKey,
+        submittedAt: submittedAt,
+        status: status ?? this.status,
+        minWorkingDays: minWorkingDays,
+        maxWorkingDays: maxWorkingDays,
+      );
+
+  /// `EID-20260827-1016`. Derived from the submission time rather than drawn at
+  /// random: two devices cannot collide inside the same minute on the same
+  /// account, and the holder can read it back over a phone line.
+  static String referenceFor(DateTime at) =>
+      'EID-${_compactDate(at)}-'
+      '${at.hour.toString().padLeft(2, '0')}'
+      '${at.minute.toString().padLeft(2, '0')}';
+
+  /// Fixed date, not a `DateTime.now()` offset — the preview screenshots would
+  /// otherwise churn on every run. Used wherever the screen is opened without
+  /// a live request behind it.
+  static final CredentialRequest sample = CredentialRequest(
+    reference: 'EID-20260827-1016',
+    kind: CredentialKind.nationalId,
+    issuerKey: 'moha',
+    submittedAt: DateTime(2026, 8, 27, 10, 16),
+  );
+
+  static DateTime _addWorkingDays(DateTime from, int days) {
+    var date = DateTime(from.year, from.month, from.day);
+    var added = 0;
+    while (added < days) {
+      date = date.add(const Duration(days: 1));
+      if (date.weekday != DateTime.saturday && date.weekday != DateTime.sunday) {
+        added++;
+      }
+    }
+    return date;
+  }
+
+  static String _isoDate(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-'
+      '${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
+
+  static String _compactDate(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}'
+      '${d.month.toString().padLeft(2, '0')}'
+      '${d.day.toString().padLeft(2, '0')}';
+}

@@ -16,11 +16,16 @@ class WalletState extends ChangeNotifier {
   HolderKey? holderKey;
   final List<WalletCredential> credentials = [];
 
+  /// The credential request sitting with the issuer, if any. Null once it has
+  /// been approved and the credential itself is in [credentials].
+  CredentialRequest? pendingRequest;
+
   /// Completed presentations, newest first.
   final List<ActivityEntry> activity = [];
 
   bool get isRegistered => _pin != null;
   bool get hasHolderKey => holderKey != null;
+  bool get hasPendingRequest => pendingRequest != null;
 
   String get displayName {
     if (draft.nameEn.trim().isNotEmpty) return draft.nameEn.trim();
@@ -73,6 +78,11 @@ class WalletState extends ChangeNotifier {
   /// never disagree about whose they are.
   Map<ClaimId, String> get _holderClaims => {
         ClaimId.fullName: displayName,
+        // Only written when the holder actually gave a Myanmar name: the sample
+        // record already carries one, and overwriting it with an empty string
+        // would blank the field rather than leave it alone.
+        if (draft.nameMy.trim().isNotEmpty)
+          ClaimId.myanmarName: draft.nameMy.trim(),
         if (draft.dateOfBirth case final dob?)
           ClaimId.dateOfBirth: _isoDate(dob),
       };
@@ -81,6 +91,41 @@ class WalletState extends ChangeNotifier {
       '${d.year.toString().padLeft(4, '0')}-'
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
+
+  /// Stand-in for the *deferred* end of OpenID4VCI: the request is accepted and
+  /// the wallet is handed a transaction id, but the credential itself only
+  /// comes back once the ministry has approved the application — days later.
+  ///
+  /// Re-running the flow returns the request already in flight rather than
+  /// filing a second one: a holder who taps twice has one application, and a
+  /// second reference number would be a second thing for a clerk to reconcile.
+  CredentialRequest submitCredentialRequest() {
+    final existing = pendingRequest;
+    if (existing != null) return existing;
+
+    final now = DateTime.now();
+    final request = CredentialRequest(
+      reference: CredentialRequest.referenceFor(now),
+      kind: CredentialKind.nationalId,
+      issuerKey: 'moha',
+      submittedAt: now,
+    );
+    pendingRequest = request;
+    notifyListeners();
+    return request;
+  }
+
+  /// The issuer approving what was pending: the credential is signed and lands
+  /// in the wallet, and the request stops being outstanding.
+  ///
+  /// In the shipped app this is driven by the notification that wakes the
+  /// wallet days later, not by a button.
+  Future<WalletCredential> approvePendingRequest() async {
+    final credential = await issueCredential();
+    pendingRequest = null;
+    notifyListeners();
+    return credential;
+  }
 
   /// Stand-in for the OpenID4VCI authorization-code flow: authorize → token →
   /// credential request carrying the holder public key as proof of possession.
@@ -147,6 +192,7 @@ class WalletState extends ChangeNotifier {
     biometricsEnabled = false;
     holderKey = null;
     credentials.clear();
+    pendingRequest = null;
     notifyListeners();
   }
 }

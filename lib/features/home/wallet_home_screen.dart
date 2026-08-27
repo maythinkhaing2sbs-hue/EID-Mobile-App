@@ -42,6 +42,18 @@ class WalletHomeScreen extends StatelessWidget {
         held.where((c) => c.kind == CredentialKind.nationalId).toList();
     final credentials = nationalIds.isEmpty ? held : nationalIds;
 
+    // A request the issuer is still reviewing. Shown here for as long as it is
+    // open, because the wait runs for days: told once on the receipt screen and
+    // never again, the holder's only way to check on their own application
+    // would be to file a second one.
+    //
+    // Suppressed once the wallet actually holds that document — a card that
+    // says "under review" above the credential it produced contradicts the
+    // card below it.
+    final pending = wallet.pendingRequest;
+    final showPending =
+        pending != null && !held.any((c) => c.kind == pending.kind);
+
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
@@ -67,7 +79,18 @@ class WalletHomeScreen extends StatelessWidget {
               ),
             ),
 
-            if (credentials.isEmpty)
+            if (showPending) ...[
+              Padding(
+                padding: Insets.page,
+                child: _PendingRequestCard(request: pending),
+              ),
+              if (credentials.isNotEmpty) Gap.h16,
+            ],
+
+            // The invitation to apply is dropped while a request is open: the
+            // holder has already done this, and asking again reads as the first
+            // attempt having failed.
+            if (credentials.isEmpty && !showPending)
               Padding(
                 padding: Insets.page,
                 child: _EmptyCredentials(
@@ -75,7 +98,7 @@ class WalletHomeScreen extends StatelessWidget {
                       Navigator.of(context).pushNamed(Routes.credentialRequest),
                 ),
               )
-            else
+            else if (credentials.isNotEmpty)
               // Full-bleed: the deck runs to both edges so the next card peeks
               // in, which is what tells the user it can be swiped.
               _CredentialDeck(credentials: credentials),
@@ -395,6 +418,104 @@ class _EmptyCredentials extends StatelessWidget {
     );
   }
 }
+
+/// A credential that has been applied for and is still with the issuer.
+///
+/// Drawn flat, on white, with an amber edge and an amber chip — never in the
+/// credential gradient. This is not a document, and a card that looks like one
+/// would have the holder trying to present it. The ground stays white so the
+/// chip has something to be seen against; the tone is carried by the border,
+/// the icon and the ink instead.
+///
+/// The date is the point of the card: a wait with an end on it is a wait, and a
+/// wait without one is a failure nobody has told the user about.
+class _PendingRequestCard extends StatelessWidget {
+  const _PendingRequestCard({required this.request});
+
+  final CredentialRequest request;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
+    final text = Theme.of(context).textTheme;
+
+    return AppCard(
+      borderColor: const Color(0xFFEAD8A6),
+      onTap: () => Navigator.of(context).pushNamed(Routes.credentialPending),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                height: 44,
+                width: 44,
+                decoration: const BoxDecoration(
+                  color: AppColors.warningSurface,
+                  borderRadius: Radii.fieldAll,
+                ),
+                child: Icon(request.kind.icon,
+                    size: 22, color: _pendingInk),
+              ),
+              Gap.w12,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      request.kind.label(s),
+                      style: text.titleMedium,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Gap.h4,
+                    Text(
+                      s.requestInProgress,
+                      style: text.bodySmall?.copyWith(color: _pendingInk),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Gap.w8,
+              StatusBadge(
+                label: s.statusUnderReview,
+                tone: BadgeTone.warning,
+                icon: Icons.hourglass_bottom_rounded,
+              ),
+            ],
+          ),
+          Gap.h12,
+          const Divider(height: 1, thickness: 1, color: AppColors.divider),
+          Gap.h12,
+          Row(
+            children: [
+              Expanded(
+                child: Text(s.requestExpectedBy, style: text.bodySmall),
+              ),
+              Text(
+                request.expectedDate,
+                style: AppTypography.numeric(
+                  size: 13,
+                  weight: FontWeight.w600,
+                  color: _pendingInk,
+                  spacing: 0,
+                ),
+              ),
+              Gap.w8,
+              const Icon(Icons.chevron_right_rounded,
+                  size: 18, color: _pendingInk),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Readable ink on the amber ground the pending card and its chip share.
+const Color _pendingInk = Color(0xFF8A6100);
 
 /// A quick action, filled in the light brand tint.
 ///

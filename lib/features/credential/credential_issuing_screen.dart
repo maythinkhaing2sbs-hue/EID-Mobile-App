@@ -3,22 +3,25 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_strings.dart';
-import '../../core/models/wallet_models.dart';
 import '../../core/models/wallet_state.dart';
 import '../../core/router/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../widgets/app_scaffold.dart';
-import '../../widgets/buttons.dart';
 import '../../widgets/cards.dart';
 import '../../widgets/success_check.dart';
 
 /// The issuer-side half of screen 9: authorize → consent → bind key → sign →
-/// store, then the issued credential.
+/// store, then a hand-off to the request receipt.
 ///
-/// Issuance takes real seconds and touches a government service, so the wait is
-/// shown as named steps rather than a bare spinner. A user who is told what is
-/// happening waits; a user watching an anonymous spinner force-quits.
+/// Submitting takes real seconds and touches a government service, so the wait
+/// is shown as named steps rather than a bare spinner. A user who is told what
+/// is happening waits; a user watching an anonymous spinner force-quits.
+///
+/// What this screen never does is end in a credential. The seconds it covers
+/// are the ones the wallet spends filing the application — approval takes days
+/// and belongs to [CredentialPendingScreen], which replaces this screen once
+/// the last step lands.
 class CredentialIssuingScreen extends StatefulWidget {
   const CredentialIssuingScreen({super.key});
 
@@ -29,8 +32,6 @@ class CredentialIssuingScreen extends StatefulWidget {
 
 class _CredentialIssuingScreenState extends State<CredentialIssuingScreen> {
   int _current = 0;
-  bool _issued = false;
-  WalletCredential? _credential;
 
   static const _stepDurations = [
     Duration(milliseconds: 900),
@@ -53,12 +54,18 @@ class _CredentialIssuingScreenState extends State<CredentialIssuingScreen> {
       setState(() => _current = i + 1);
     }
 
-    final credential = await WalletScope.read(context).issueCredential();
     if (!mounted) return;
-    setState(() {
-      _issued = true;
-      _credential = credential;
-    });
+
+    // The round-trip ends with the request *accepted*, not with a credential:
+    // the issuer signs it only after a person has approved the application.
+    // The wait that follows belongs to its own screen, which replaces this one
+    // so the completed progress list is not left behind to walk back into.
+    WalletScope.read(context).submitCredentialRequest();
+    if (!mounted) return;
+    Navigator.of(context).pushReplacementNamed(
+      Routes.credentialPending,
+      arguments: true,
+    );
   }
 
   @override
@@ -72,10 +79,6 @@ class _CredentialIssuingScreenState extends State<CredentialIssuingScreen> {
       s.stepSign,
       s.stepStore,
     ];
-
-    if (_issued && _credential != null) {
-      return _IssuedView(credential: _credential!);
-    }
 
     return AppScaffold(
       showBack: false,
@@ -306,58 +309,4 @@ class _ProgressRingPainter extends CustomPainter {
   @override
   bool shouldRepaint(_ProgressRingPainter old) =>
       old.progress != progress || old.pulse != pulse;
-}
-
-/// "Credential Issued" — the credential itself, front and centre.
-class _IssuedView extends StatelessWidget {
-  const _IssuedView({required this.credential});
-
-  final WalletCredential credential;
-
-  @override
-  Widget build(BuildContext context) {
-    final s = AppStrings.of(context);
-
-    return AppScaffold(
-      showBack: false,
-      bottomBar: PrimaryButton(
-        label: s.goToWalletHome,
-        onPressed: () => Navigator.of(context)
-            .pushNamedAndRemoveUntil(Routes.home, (route) => false),
-      ),
-      child: ListView(
-        padding: const EdgeInsets.only(top: Gap.xl, bottom: Gap.xl),
-        children: [
-          const Center(child: SuccessCheck(size: 80)),
-          Gap.h24,
-          ScreenHeader(
-            title: s.credentialIssued,
-            subtitle: s.readySubtitle,
-            align: CrossAxisAlignment.center,
-          ),
-          Gap.h32,
-          CredentialCard(credential: credential),
-          Gap.h16,
-          AppCard(
-            child: Column(
-              children: [
-                KeyValueRow(
-                  label: s.issuer,
-                  value: credential.issuerName(s),
-                ),
-                const Divider(height: Gap.lg),
-                KeyValueRow(
-                  label: s.attrExpiry,
-                  value: credential.validUntil,
-                  numericValue: true,
-                ),
-              ],
-            ),
-          ),
-          Gap.h16,
-          InfoNote(text: s.keyPointBinding, icon: Icons.link_rounded),
-        ],
-      ),
-    );
-  }
 }

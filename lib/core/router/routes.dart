@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../features/auth/auth_screen.dart';
+import '../../features/credential/credential_issued_screen.dart';
 import '../../features/credential/credential_issuing_screen.dart';
+import '../../features/credential/credential_pending_screen.dart';
 import '../../features/credential/request_credential_screen.dart';
 import '../../features/home/wallet_home_screen.dart';
 import '../../features/keys/create_key_pair_screen.dart';
@@ -47,6 +49,15 @@ abstract final class Routes {
   // Issuance (OpenID4VCI)
   static const credentialRequest = '/credential/request';
   static const credentialIssuing = '/credential/issuing';
+
+  /// The filed request, waiting on the issuer. Takes an optional `bool`
+  /// argument — true when it closes the issuance flow, which drops the back
+  /// arrow; false or absent when it is opened from Home to check on progress.
+  static const credentialPending = '/credential/pending';
+
+  /// The approved credential. Takes an optional [WalletCredential]; without one
+  /// it shows whatever National ID the wallet holds.
+  static const credentialIssued = '/credential/issued';
 
   // Presentation (OpenID4VP)
   static const presentScan = '/present/scan';
@@ -94,6 +105,16 @@ abstract final class Routes {
         return page(const RequestCredentialScreen());
       case credentialIssuing:
         return page(const CredentialIssuingScreen());
+
+      case credentialPending:
+        return page(CredentialPendingScreen(
+          justSubmitted: _arg<bool>(settings) ?? false,
+        ));
+
+      case credentialIssued:
+        return page(CredentialIssuedScreen(
+          credential: _arg<WalletCredential>(settings),
+        ));
 
       case presentScan:
         return page(const QrScanScreen());

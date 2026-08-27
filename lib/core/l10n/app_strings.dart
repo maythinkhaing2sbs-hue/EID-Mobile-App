@@ -160,6 +160,24 @@ class AppStrings {
   String get stepStore => _s('stepStore');
   String get credentialIssued => _s('credentialIssued');
 
+  /// Sits under [credentialIssued]. Deliberately not the wallet-ready copy the
+  /// screen used to borrow: by this point the security key already exists, so
+  /// promising to create it next was describing a step that had already
+  /// happened. What is actually outstanding is the issuer's own processing.
+  String get credentialIssuedSubtitle => _s('credentialIssuedSubtitle');
+
+  // ── 8c. Request pending (deferred issuance) ─────────────────────────────
+  String get requestPendingTitle => _s('requestPendingTitle');
+  String get requestPendingSubtitle => _s('requestPendingSubtitle');
+  String get statusLabel => _s('statusLabel');
+  String get statusUnderReview => _s('statusUnderReview');
+  String get requestReference => _s('requestReference');
+  String get requestSubmittedOn => _s('requestSubmittedOn');
+  String get requestExpectedBy => _s('requestExpectedBy');
+  String get requestInProgress => _s('requestInProgress');
+  String get viewStatus => _s('viewStatus');
+  String get simulateApproval => _s('simulateApproval');
+
   // ── 9. QR scan ──────────────────────────────────────────────────────────
   String get scanTitle => _s('scanTitle');
   String get scanSubtitle => _s('scanSubtitle');
@@ -211,6 +229,10 @@ class AppStrings {
 
   // ── Credential attributes ───────────────────────────────────────────────
   String get attrFullName => _s('attrFullName');
+  String get attrMyanmarName => _s('attrMyanmarName');
+  String get attrFatherName => _s('attrFatherName');
+  String get attrGender => _s('attrGender');
+  String get attrBloodType => _s('attrBloodType');
   String get attrDob => _s('attrDob');
   String get attrNationality => _s('attrNationality');
   String get attrDocNumber => _s('attrDocNumber');
@@ -354,13 +376,29 @@ class AppStrings {
         'ဤတန်ဖိုးများအတိုင်း ထုတ်ပေးသူက လက်မှတ်ရေးထိုး ထုတ်ပေးပါမည်။',
     'issuerVerified': 'အတည်ပြုပြီး ထုတ်ပေးသူ',
     'requestCredential': 'အထောက်အထား တောင်းခံရန်',
-    'issuingTitle': 'သင့်အထောက်အထားကို ဖန်တီးနေပါသည်',
+    'issuingTitle': 'သင့်အထောက်အထားကို တောင်းခံနေပါသည်',
     'stepAuthorize': 'ထုတ်ပေးသူထံ ခွင့်ပြုချက် တောင်းခံခြင်း',
     'stepConsent': 'သင့်သဘောတူညီချက် ရယူခြင်း',
     'stepBindKey': 'Holder Public Key နှင့် တွဲချည်ခြင်း',
     'stepSign': 'ထုတ်ပေးသူ၏ သော့ဖြင့် လက်မှတ်ရေးထိုးခြင်း',
     'stepStore': 'Wallet အတွင်း လုံခြုံစွာ သိမ်းဆည်းခြင်း',
     'credentialIssued': 'အထောက်အထား ထုတ်ပေးပြီးပါပြီ',
+    'credentialIssuedSubtitle':
+        'ထုတ်ပေးသူမှ လက်မှတ်ရေးထိုးပြီး သင့် Wallet ထဲတွင် လုံခြုံစွာ '
+        'သိမ်းဆည်းပြီးပါပြီ။',
+
+    'requestPendingTitle': 'တောင်းခံမှုကို စောင့်ဆိုင်းနေပါသည်',
+    'requestPendingSubtitle':
+        'သင့်အထောက်အထားကို ဌာနမှ စိစစ်နေပါသည်။ ပြီးစီးပါက သင့် Wallet ထဲသို့ '
+        'အလိုအလျောက် ရောက်ရှိပါမည်။',
+    'statusLabel': 'အခြေအနေ',
+    'statusUnderReview': 'စိစစ်နေဆဲ',
+    'requestReference': 'တောင်းခံမှု အမှတ်',
+    'requestSubmittedOn': 'တောင်းခံသည့် ရက်စွဲ',
+    'requestExpectedBy': 'ခန့်မှန်း ပြီးစီးမည့်ရက်',
+    'requestInProgress': 'ဆောင်ရွက်ဆဲ တောင်းခံမှု',
+    'viewStatus': 'အခြေအနေ ကြည့်ရန်',
+    'simulateApproval': 'ထုတ်ပေးပြီးကြောင်း စမ်းသပ်ရန်',
 
     'scanTitle': 'ဘဏ်နှင့် အတည်ပြုရန် စကန်ဖတ်ပါ',
     'scanSubtitle': 'ဘဏ်၏ ဖန်သားပြင်ပေါ်ရှိ QR ကုဒ်ကို ဘောင်အတွင်း ချိန်ပါ။',
@@ -405,6 +443,10 @@ class AppStrings {
     'transactionId': 'လုပ်ဆောင်မှု အမှတ်',
 
     'attrFullName': 'အမည် အပြည့်အစုံ',
+    'attrMyanmarName': 'မြန်မာအမည်',
+    'attrFatherName': 'အဖအမည်',
+    'attrGender': 'ကျား/မ',
+    'attrBloodType': 'သွေးအုပ်စု',
     'attrDob': 'မွေးသက္ကရာဇ်',
     'attrNationality': 'နိုင်ငံသား',
     'attrDocNumber': 'စာရွက်စာတမ်း အမှတ်',
@@ -547,13 +589,29 @@ class AppStrings {
         'These are the exact values the issuer will sign into your credential.',
     'issuerVerified': 'Verified issuer',
     'requestCredential': 'Request Credential',
-    'issuingTitle': 'Creating your credential',
+    'issuingTitle': 'Requesting your credential',
     'stepAuthorize': 'Requesting authorization from the issuer',
     'stepConsent': 'Capturing your consent',
     'stepBindKey': 'Binding to your Holder Public Key',
     'stepSign': 'Signing with the issuer key',
     'stepStore': 'Storing securely in your wallet',
     'credentialIssued': 'Credential Issued',
+    'credentialIssuedSubtitle':
+        'The issuer has signed your credential and it is now stored securely '
+        'in your wallet.',
+
+    'requestPendingTitle': 'Waiting on your request',
+    'requestPendingSubtitle':
+        'The ministry is reviewing your application. Once it is approved, the '
+        'credential arrives in your wallet on its own.',
+    'statusLabel': 'Status',
+    'statusUnderReview': 'Under review',
+    'requestReference': 'Reference number',
+    'requestSubmittedOn': 'Submitted on',
+    'requestExpectedBy': 'Expected by',
+    'requestInProgress': 'Request in progress',
+    'viewStatus': 'View status',
+    'simulateApproval': 'Simulate issuer approval',
 
     'scanTitle': 'Scan to Verify with Bank',
     'scanSubtitle':
@@ -598,6 +656,10 @@ class AppStrings {
     'transactionId': 'Transaction ID',
 
     'attrFullName': 'Full Name',
+    'attrMyanmarName': 'Myanmar Name',
+    'attrFatherName': 'Father Name',
+    'attrGender': 'Gender',
+    'attrBloodType': 'Blood Type',
     'attrDob': 'Date of Birth',
     'attrNationality': 'Nationality',
     'attrDocNumber': 'Document Number',

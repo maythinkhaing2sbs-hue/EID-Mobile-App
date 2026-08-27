@@ -129,7 +129,11 @@ class ReviewRequestScreen extends StatelessWidget {
   /// question is already answered by the card behind it.
   static const List<ClaimId> _detailClaims = [
     ClaimId.fullName,
+    ClaimId.myanmarName,
+    ClaimId.fatherName,
     ClaimId.dateOfBirth,
+    ClaimId.gender,
+    ClaimId.bloodType,
     ClaimId.nationality,
     ClaimId.documentNumber,
     ClaimId.expiryDate,
@@ -149,6 +153,13 @@ class ReviewRequestScreen extends StatelessWidget {
       showDragHandle: true,
       backgroundColor: AppColors.surface,
       isScrollControlled: true,
+      // Capped rather than free-standing: the record is long enough to fill the
+      // screen, and a sheet that reaches the status bar stops reading as a
+      // sheet - the request behind it has to stay visible for the holder to
+      // know what they are still deciding about.
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.78,
+      ),
       builder: (_) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, Gap.xl),
