@@ -22,12 +22,13 @@ enum AuthMode { signIn, signUp }
 /// differ by a single field, and a citizen who taps the wrong one should be
 /// able to correct it without losing what they have already typed. The
 /// controllers below are shared across both modes for exactly that reason —
-/// switching tabs keeps the email, phone and UID intact.
+/// switching tabs keeps the email and UID intact.
 ///
-/// Both forms ask for email, phone *and* UID. That is heavier than a
-/// conventional login, and deliberately so: this is a government identity
-/// wallet, and the three together are what the issuer matches against the
-/// national register.
+/// Both forms ask for email *and* UID. That is heavier than a conventional
+/// login, and deliberately so: this is a government identity wallet, and the
+/// pair together is what the issuer matches against the national register.
+/// No phone number is asked for here — the one-time code goes to the address
+/// on file, so a handset number would be a field with nothing behind it.
 ///
 /// Creating an account does not sign the user in. It confirms and returns to
 /// the sign-in tab, because everything past this screen belongs to a session
@@ -55,7 +56,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
   final _name = TextEditingController();
   final _email = TextEditingController();
-  final _phone = TextEditingController();
   final _uid = TextEditingController();
 
   @override
@@ -65,7 +65,6 @@ class _AuthScreenState extends State<AuthScreen> {
     final draft = WalletScope.read(context).draft;
     _name.text = draft.nameEn.isNotEmpty ? draft.nameEn : draft.nameMy;
     _email.text = draft.email;
-    _phone.text = draft.phone;
     _uid.text = draft.uid;
   }
 
@@ -73,7 +72,6 @@ class _AuthScreenState extends State<AuthScreen> {
   void dispose() {
     _name.dispose();
     _email.dispose();
-    _phone.dispose();
     _uid.dispose();
     super.dispose();
   }
@@ -91,7 +89,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
     final draft = WalletScope.read(context).draft
       ..email = _email.text.trim()
-      ..phone = _phone.text.trim()
       ..uid = _uid.text.trim()
       // The one-time code goes to the address. This is the wallet's own
       // account rather than a handset, and the mailbox is the channel the
@@ -120,7 +117,7 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   /// Confirms the new account, then hands the user to the sign-in tab with
-  /// what they typed still in place — one field to re-enter, not four.
+  /// what they typed still in place — nothing to re-enter.
   Future<void> _confirmSignUp() async {
     final s = AppStrings.of(context);
 
@@ -261,27 +258,6 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
           Gap.h12,
 
-          AuthField(
-            controller: _phone,
-            icon: Icons.phone_iphone_rounded,
-            hint: s.fieldPhone,
-            numeric: true,
-            prefix: '+95 ',
-            keyboardType: TextInputType.phone,
-            textInputAction: TextInputAction.next,
-            autofillHints: const [AutofillHints.telephoneNumber],
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[\d\s-]')),
-              LengthLimitingTextInputFormatter(15),
-            ],
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) return s.errRequired;
-              if (!Validators.isPhone(v)) return s.errPhone;
-              return null;
-            },
-          ),
-          Gap.h12,
-
           // The wallet's own account number, not the citizen's NRC — so no
           // township-code mask and no NRC pattern check. It is validated for
           // length and character set only.
@@ -304,9 +280,9 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
 
           Gap.h24,
-          // No "no account yet?" link under it: the segmented control above
-          // is the same switch, and offering it twice on a four-field form
-          // only pushed the action itself further down a short handset.
+          // No "no account yet?" link under it: the segmented control above is
+          // the same switch, and offering it twice only pushed the action
+          // itself further down a short handset.
           PrimaryButton(
             label: _isSignUp ? s.authTabSignUp : s.authTabSignIn,
             onPressed: _submit,

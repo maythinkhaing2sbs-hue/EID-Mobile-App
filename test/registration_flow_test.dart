@@ -56,16 +56,18 @@ void main() {
   });
 
   group('Auth screen', () {
-    testWidgets('signing in asks for email, phone and UID — but not a name',
+    testWidgets('signing in asks for email and UID — but not a name or a phone',
         (tester) async {
       await setPhoneSurface(tester);
       await tester.pumpWidget(wrapScreen(const AuthScreen()));
 
-      expect(find.byType(AuthField), findsNWidgets(3));
+      expect(find.byType(AuthField), findsNWidgets(2));
       expect(find.text(my.fieldFullName), findsNothing);
       expect(find.text(my.fieldEmail), findsOneWidget);
-      expect(find.text(my.fieldPhone), findsOneWidget);
       expect(find.text(my.fieldUidNumber), findsOneWidget);
+      // The code goes to the address on file, so a handset number would be a
+      // field with nothing behind it.
+      expect(find.text(my.fieldPhone), findsNothing);
     });
 
     testWidgets('the Create account tab adds the name field and keeps typing',
@@ -80,7 +82,7 @@ void main() {
       await tester.tap(find.text(my.authTabSignUp));
       await tester.pumpAndSettle();
 
-      expect(find.byType(AuthField), findsNWidgets(4));
+      expect(find.byType(AuthField), findsNWidgets(3));
       expect(find.text(my.fieldFullName), findsOneWidget);
       // Switching tabs must not throw away what has already been typed.
       expect(find.text('aung.ko@example.com'), findsOneWidget);
@@ -93,7 +95,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, my.authTabSignIn));
       await tester.pumpAndSettle();
 
-      expect(find.text(my.errRequired), findsNWidgets(3));
+      expect(find.text(my.errRequired), findsNWidgets(2));
     });
 
     testWidgets('a completed sign-up is written to the draft', (tester) async {
@@ -114,12 +116,11 @@ void main() {
       await tester.enterText(find.widgetWithText(TextFormField, my.fieldEmail),
           'aung.ko@example.com');
       await tester.enterText(
-          find.widgetWithText(TextFormField, my.fieldPhone), '9 123 456 789');
-      await tester.enterText(
           find.widgetWithText(TextFormField, my.fieldUidNumber), 'UID12345678');
       await tester.pumpAndSettle();
 
-      // Four fields push the action below the fold on a 390×844 handset.
+      // The keyboard can still leave the action below the fold on a 390×844
+      // handset, so it is scrolled into view before being tapped.
       final submit = find.widgetWithText(FilledButton, my.authTabSignUp);
       await tester.ensureVisible(submit);
       await tester.pumpAndSettle();
@@ -150,8 +151,6 @@ void main() {
       await tester.enterText(find.widgetWithText(TextFormField, my.fieldEmail),
           'aung.ko@example.com');
       await tester.enterText(
-          find.widgetWithText(TextFormField, my.fieldPhone), '9 123 456 789');
-      await tester.enterText(
           find.widgetWithText(TextFormField, my.fieldUidNumber), 'UID12345678');
       await tester.pumpAndSettle();
 
@@ -166,10 +165,10 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, my.authTabSignIn));
       await tester.pumpAndSettle();
 
-      // Back on the sign-in form: three fields, no name, and what was typed
+      // Back on the sign-in form: two fields, no name, and what was typed
       // is still there so signing in is not a second round of typing.
       expect(find.text(my.authSignUpDoneTitle), findsNothing);
-      expect(find.byType(AuthField), findsNWidgets(3));
+      expect(find.byType(AuthField), findsNWidgets(2));
       expect(find.text('aung.ko@example.com'), findsOneWidget);
     });
   });
