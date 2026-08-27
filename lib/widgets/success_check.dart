@@ -21,7 +21,7 @@ import '../core/theme/app_dimens.dart';
 ///
 /// The heartbeat never settles, so a widget test that lands on a screen using
 /// this must drive the clock with `pump(duration)`, not `pumpAndSettle()`.
-class SuccessCheck extends StatefulWidget {
+class SuccessCheck extends StatelessWidget {
   const SuccessCheck({
     super.key,
     this.size = 96,
@@ -38,10 +38,65 @@ class SuccessCheck extends StatefulWidget {
   final bool pulse;
 
   @override
-  State<SuccessCheck> createState() => _SuccessCheckState();
+  Widget build(BuildContext context) => _AnimatedMark(
+        size: size,
+        color: color,
+        haptic: haptic,
+        pulse: pulse,
+        failed: false,
+      );
 }
 
-class _SuccessCheckState extends State<SuccessCheck>
+/// The failure counterpart of [SuccessCheck]: the same halo, disc and
+/// heartbeat, drawing a cross instead of a tick and in the danger colour.
+///
+/// Same motion on purpose. Success and failure are two outcomes of one
+/// operation, and a failure that arrives with different choreography reads as
+/// a different *kind* of event — a crash rather than an answer.
+class FailureCross extends StatelessWidget {
+  const FailureCross({
+    super.key,
+    this.size = 96,
+    this.color = AppColors.danger,
+    this.haptic = true,
+    this.pulse = true,
+  });
+
+  final double size;
+  final Color color;
+  final bool haptic;
+  final bool pulse;
+
+  @override
+  Widget build(BuildContext context) => _AnimatedMark(
+        size: size,
+        color: color,
+        haptic: haptic,
+        pulse: pulse,
+        failed: true,
+      );
+}
+
+class _AnimatedMark extends StatefulWidget {
+  const _AnimatedMark({
+    required this.size,
+    required this.color,
+    required this.haptic,
+    required this.pulse,
+    required this.failed,
+  });
+
+  final double size;
+  final Color color;
+  final bool haptic;
+  final bool pulse;
+  final bool failed;
+
+  @override
+  State<_AnimatedMark> createState() => _AnimatedMarkState();
+}
+
+class _AnimatedMarkState extends State<_AnimatedMark>
     with TickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
     vsync: this,
@@ -71,7 +126,9 @@ class _SuccessCheckState extends State<SuccessCheck>
     if (widget.pulse) _beat.repeat();
     if (widget.haptic) {
       WidgetsBinding.instance.addPostFrameCallback(
-        (_) => HapticFeedback.mediumImpact(),
+        (_) => widget.failed
+            ? HapticFeedback.heavyImpact()
+            : HapticFeedback.mediumImpact(),
       );
     }
   }
@@ -94,9 +151,10 @@ class _SuccessCheckState extends State<SuccessCheck>
           painter: _CheckPainter(
             ring: _ring.value,
             tick: _tick.value,
-            // The heartbeat only starts once the tick has landed, so the two
+            // The heartbeat only starts once the mark has landed, so the two
             // motions never overlap.
             beat: widget.pulse && _c.isCompleted ? _beat.value : 0,
+            failed: widget.failed,
             color: widget.color,
           ),
         ),
@@ -110,6 +168,7 @@ class _CheckPainter extends CustomPainter {
     required this.ring,
     required this.tick,
     required this.beat,
+    required this.failed,
     required this.color,
   });
 
@@ -118,6 +177,9 @@ class _CheckPainter extends CustomPainter {
 
   /// Position in the heartbeat cycle, 0 when there is none.
   final double beat;
+
+  /// Draws a cross rather than a tick.
+  final bool failed;
   final Color color;
 
   @override
@@ -160,17 +222,37 @@ class _CheckPainter extends CustomPainter {
 
     if (tick <= 0) return;
 
-    // Tick, drawn as a two-segment stroke revealed left-to-right.
-    final p1 = Offset(size.width * 0.34, size.height * 0.52);
-    final p2 = Offset(size.width * 0.45, size.height * 0.63);
-    final p3 = Offset(size.width * 0.67, size.height * 0.40);
-
     final paint = Paint()
       ..color = Colors.white
       ..strokeWidth = size.width * 0.075
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
       ..style = PaintingStyle.stroke;
+
+    // Both marks are two strokes drawn in sequence: the tick as one bent
+    // path, the cross as two separate ones. `split` is where the first
+    // stroke hands over to the second.
+    if (failed) {
+      const split = 0.5;
+      final a1 = Offset(size.width * 0.37, size.height * 0.37);
+      final a2 = Offset(size.width * 0.63, size.height * 0.63);
+      final b1 = Offset(size.width * 0.63, size.height * 0.37);
+      final b2 = Offset(size.width * 0.37, size.height * 0.63);
+
+      final t = (tick / split).clamp(0.0, 1.0);
+      canvas.drawLine(a1, Offset.lerp(a1, a2, t)!, paint);
+
+      if (tick > split) {
+        final u = (tick - split) / (1 - split);
+        canvas.drawLine(b1, Offset.lerp(b1, b2, u)!, paint);
+      }
+      return;
+    }
+
+    // Tick, drawn as a two-segment stroke revealed left-to-right.
+    final p1 = Offset(size.width * 0.34, size.height * 0.52);
+    final p2 = Offset(size.width * 0.45, size.height * 0.63);
+    final p3 = Offset(size.width * 0.67, size.height * 0.40);
 
     final path = Path()..moveTo(p1.dx, p1.dy);
     const split = 0.38; // first segment is the shorter of the two
@@ -191,6 +273,7 @@ class _CheckPainter extends CustomPainter {
       old.ring != ring ||
       old.tick != tick ||
       old.beat != beat ||
+      old.failed != failed ||
       old.color != color;
 }
 

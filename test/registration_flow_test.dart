@@ -1,6 +1,7 @@
 import 'package:eid_wallet/core/models/wallet_models.dart';
 import 'package:eid_wallet/core/models/wallet_state.dart';
 import 'package:eid_wallet/features/auth/auth_screen.dart';
+import 'package:eid_wallet/features/keys/key_pair_created_screen.dart';
 import 'package:eid_wallet/features/onboarding/welcome_screen.dart';
 import 'package:eid_wallet/features/registration/registration_method_screen.dart';
 import 'package:eid_wallet/features/registration/wallet_ready_screen.dart';
@@ -8,6 +9,7 @@ import 'package:eid_wallet/features/security/pin_setup_screen.dart';
 import 'package:eid_wallet/widgets/app_text_field.dart';
 import 'package:eid_wallet/widgets/auth_field.dart';
 import 'package:eid_wallet/widgets/pin_pad.dart';
+import 'package:eid_wallet/widgets/success_check.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -372,6 +374,49 @@ void main() {
       // The action leads into key creation, not into the wallet: the wallet
       // is not usable until the holder key exists.
       expect(find.text(my.goToKeyPair), findsOneWidget);
+    });
+  });
+
+  group('Key pair outcome', () {
+    // Both marks animate for as long as the screen is up, so this screen is
+    // pumped by hand throughout — long enough for the switcher to finish, or
+    // the outgoing body is still on the tree when the assertion runs.
+    Future<void> settle(WidgetTester tester) async {
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    }
+
+    testWidgets('the mark swaps between the created and failed outcomes',
+        (tester) async {
+      await setPhoneSurface(tester);
+      final wallet = WalletState()
+        ..holderKey = HolderKey.demo(DateTime(2026, 5, 15, 10, 30));
+      await tester.pumpWidget(
+        wrapScreen(const KeyPairCreatedScreen(), wallet: wallet),
+      );
+      await settle(tester);
+
+      expect(find.text(my.keyCreatedTitle), findsOneWidget);
+      expect(find.text(my.getYourIdTitle), findsOneWidget);
+
+      await tester.tap(find.byType(SuccessCheck));
+      await settle(tester);
+
+      // The failure outcome drops the two facts that no longer exist and
+      // offers the retry in place of going on to issuance.
+      expect(find.text(my.keyFailedTitle), findsOneWidget);
+      expect(find.text(my.keyCreatedTitle), findsNothing);
+      expect(find.text(my.keyFailedReason), findsOneWidget);
+      expect(find.text(my.keyCreated), findsNothing);
+      expect(find.text(my.tryAgain), findsOneWidget);
+      expect(find.text(my.getYourIdTitle), findsNothing);
+
+      await tester.tap(find.byType(FailureCross));
+      await settle(tester);
+
+      expect(find.text(my.keyCreatedTitle), findsOneWidget);
+      expect(find.text(my.keyFailedTitle), findsNothing);
     });
   });
 }
