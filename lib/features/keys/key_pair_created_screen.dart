@@ -112,14 +112,15 @@ class _KeyPairCreatedScreenState extends State<KeyPairCreatedScreen> {
         ),
 
         Gap.h12,
+        // The reassurance about the private key stays on the screen *before*
+        // this one, where it is still a promise the user is deciding on. Here
+        // the key exists and the card was only restating what the subtitle
+        // above already says.
         _PublicKeyDisclosure(
           expanded: _showKey,
           value: key?.publicKeyBase64 ?? '',
           onToggle: () => setState(() => _showKey = !_showKey),
         ),
-
-        Gap.h16,
-        InfoNote(text: s.keyPointPrivate),
       ],
     );
   }
