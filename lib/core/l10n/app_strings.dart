@@ -134,6 +134,11 @@ class AppStrings {
   String get keyStatusNotCreated => _s('keyStatusNotCreated');
   String get keyCreatedTitle => _s('keyCreatedTitle');
   String get keyCreatedSubtitle => _s('keyCreatedSubtitle');
+  String get keyFailedTitle => _s('keyFailedTitle');
+  String get keyFailedSubtitle => _s('keyFailedSubtitle');
+  String get keyFailedReason => _s('keyFailedReason');
+  String get reason => _s('reason');
+  String get tryAgain => _s('tryAgain');
   String get keyType => _s('keyType');
   String get keyCreated => _s('keyCreated');
   String get keyStatus => _s('keyStatus');
@@ -336,6 +341,12 @@ class AppStrings {
     'keyCreatedTitle': 'Holder Key Pair ဖန်တီးပြီးပါပြီ',
     'keyCreatedSubtitle':
         'သင့်သော့တွဲကို ဖုန်း၏ လုံခြုံသော Keystore အတွင်း သိမ်းဆည်းပြီးပါပြီ။',
+    'keyFailedTitle': 'Holder Key Pair ဖန်တီး၍ မရပါ',
+    'keyFailedSubtitle':
+        'ဖုန်း၏ လုံခြုံသော Keystore က တောင်းဆိုမှုကို ငြင်းပယ်လိုက်ပါသည်။ ဘာမျှ သိမ်းဆည်းမထားသဖြင့် ထပ်မံ ကြိုးစားနိုင်ပါသည်။',
+    'keyFailedReason': 'Keystore ဝင်ခွင့် မရပါ',
+    'reason': 'အကြောင်းရင်း',
+    'tryAgain': 'ထပ်မံ ကြိုးစားရန်',
     'keyType': 'သော့အမျိုးအစား',
     'keyCreated': 'ဖန်တီးသည့်နေ့',
     'keyStatus': 'အခြေအနေ',
@@ -529,6 +540,12 @@ class AppStrings {
     'keyCreatedTitle': 'Holder Key Pair Created',
     'keyCreatedSubtitle':
         'Your key pair has been stored in this device’s secure keystore.',
+    'keyFailedTitle': 'Holder Key Pair Not Created',
+    'keyFailedSubtitle':
+        'This device’s secure keystore refused the request. Nothing was saved, so you can try again.',
+    'keyFailedReason': 'Keystore access denied',
+    'reason': 'Reason',
+    'tryAgain': 'Try again',
     'keyType': 'Key type',
     'keyCreated': 'Created',
     'keyStatus': 'Status',
