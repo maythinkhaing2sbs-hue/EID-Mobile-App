@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,28 +12,48 @@ import '../core/theme/app_dimens.dart';
 /// Animated in two beats — the ring scales in, then the tick draws itself —
 /// because an instantly-complete checkmark reads as a static icon, while a
 /// drawn one reads as *something just finished*.
+///
+/// Once drawn, the mark keeps a slow heartbeat: a ring leaves the disc and the
+/// disc breathes with it. The tick is never re-drawn — undrawing a completed
+/// mark would say the thing had come *undone* — so what loops is only the
+/// signal that the result is live. Pass `pulse: false` for a mark inside a
+/// list, where a heartbeat is noise.
+///
+/// The heartbeat never settles, so a widget test that lands on a screen using
+/// this must drive the clock with `pump(duration)`, not `pumpAndSettle()`.
 class SuccessCheck extends StatefulWidget {
   const SuccessCheck({
     super.key,
     this.size = 96,
     this.color = AppColors.success,
     this.haptic = true,
+    this.pulse = true,
   });
 
   final double size;
   final Color color;
   final bool haptic;
 
+  /// Whether the mark keeps its heartbeat after the tick has landed.
+  final bool pulse;
+
   @override
   State<SuccessCheck> createState() => _SuccessCheckState();
 }
 
 class _SuccessCheckState extends State<SuccessCheck>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 720),
   )..forward();
+
+  /// The heartbeat. Its own controller, because the draw is one-shot and
+  /// folding the two together would re-draw the tick on every beat.
+  late final AnimationController _beat = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2600),
+  );
 
   late final Animation<double> _ring = CurvedAnimation(
     parent: _c,
@@ -46,6 +68,7 @@ class _SuccessCheckState extends State<SuccessCheck>
   @override
   void initState() {
     super.initState();
+    if (widget.pulse) _beat.repeat();
     if (widget.haptic) {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => HapticFeedback.mediumImpact(),
@@ -55,6 +78,7 @@ class _SuccessCheckState extends State<SuccessCheck>
 
   @override
   void dispose() {
+    _beat.dispose();
     _c.dispose();
     super.dispose();
   }
@@ -65,11 +89,14 @@ class _SuccessCheckState extends State<SuccessCheck>
       height: widget.size,
       width: widget.size,
       child: AnimatedBuilder(
-        animation: _c,
+        animation: Listenable.merge([_c, _beat]),
         builder: (context, _) => CustomPaint(
           painter: _CheckPainter(
             ring: _ring.value,
             tick: _tick.value,
+            // The heartbeat only starts once the tick has landed, so the two
+            // motions never overlap.
+            beat: widget.pulse && _c.isCompleted ? _beat.value : 0,
             color: widget.color,
           ),
         ),
@@ -82,11 +109,15 @@ class _CheckPainter extends CustomPainter {
   const _CheckPainter({
     required this.ring,
     required this.tick,
+    required this.beat,
     required this.color,
   });
 
   final double ring;
   final double tick;
+
+  /// Position in the heartbeat cycle, 0 when there is none.
+  final double beat;
   final Color color;
 
   @override
@@ -100,10 +131,30 @@ class _CheckPainter extends CustomPainter {
       r * ring,
       Paint()..color = color.withValues(alpha: 0.12),
     );
+
+    // Heartbeat: one ring leaves the disc per cycle and fades into the halo,
+    // and the disc swells a hair as it goes.
+    var swell = 1.0;
+    if (beat > 0) {
+      final travel = Curves.easeOutCubic.transform(beat);
+      final alpha = (1 - beat) * 0.34;
+      if (alpha > 0.01) {
+        canvas.drawCircle(
+          centre,
+          r * (0.76 + 0.24 * travel),
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2
+            ..color = color.withValues(alpha: alpha),
+        );
+      }
+      swell = 1 + 0.028 * math.sin(beat * math.pi * 2);
+    }
+
     // Disc
     canvas.drawCircle(
       centre,
-      r * 0.76 * ring,
+      r * 0.76 * ring * swell,
       Paint()..color = color,
     );
 
@@ -137,7 +188,10 @@ class _CheckPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_CheckPainter old) =>
-      old.ring != ring || old.tick != tick || old.color != color;
+      old.ring != ring ||
+      old.tick != tick ||
+      old.beat != beat ||
+      old.color != color;
 }
 
 /// Full-screen confirmation layout shared by every "done" screen: mark,

@@ -124,6 +124,10 @@ abstract final class Validators {
 
   static bool isEmail(String v) => _email.hasMatch(v.trim());
   static bool isPhone(String v) => _phone.hasMatch(v.trim());
+
+  /// Whether a name was typed in Latin script. The sign-up form captures one
+  /// name field but the credential carries the holder's name in both scripts,
+  /// so this decides which of the two slots the entry belongs in.
   static bool isLatinName(String v) => _latin.hasMatch(v.trim());
   static bool isUid(String v) => _uid.hasMatch(v.replaceAll(' ', '').trim());
 }

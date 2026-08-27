@@ -4,10 +4,12 @@ import '../../core/l10n/app_strings.dart';
 import '../../core/models/wallet_models.dart';
 import '../../core/models/wallet_state.dart';
 import '../../core/router/routes.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_typography.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/buttons.dart';
+import '../../widgets/icon_motion.dart';
 import '../../widgets/otp_field.dart';
 import '../../widgets/pulse_icon.dart';
 
@@ -19,10 +21,10 @@ import '../../widgets/pulse_icon.dart';
 /// own, and it crowded a screen the user needs to scan in one glance while
 /// holding an SMS in their other hand.
 ///
-/// The number is set in the tabular face and given its own line, so it can be
-/// checked digit by digit; "Change" sits directly under it as plain text,
-/// because a mistyped digit is the commonest way this screen dead-ends and a
-/// back arrow does not read as "fix the number".
+/// The destination is masked and given its own line so it can be checked at a
+/// glance. There is no "change it" affordance: the address was typed two
+/// screens ago and the back arrow already walks there, so a second route out
+/// only added a way to lose a code that has already been sent.
 ///
 /// Demo rule: any 6 digits verify, except `000000`, which is wired to the
 /// failure path so the error state stays reachable during review.
@@ -71,7 +73,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
     return AppScaffold(
       step: 2,
-      totalSteps: 3,
+      totalSteps: 4,
       bottomBar: PrimaryButton(
         label: s.verify,
         busy: _busy,
@@ -85,6 +87,13 @@ class _OtpScreenState extends State<OtpScreen> {
               icon: byEmail
                   ? Icons.mark_email_unread_rounded
                   : Icons.sms_rounded,
+              // Tinted like the PIN badge rather than a solid brand disc: the
+              // two screens are consecutive, and the heavier mark made this
+              // one read as the more important of the pair.
+              fill: AppColors.secondary,
+              iconColor: AppColors.primary,
+              // The glyph keeps landing for as long as the code has not.
+              motion: IconMotion.arrive,
             ),
           ),
 
@@ -108,30 +117,28 @@ class _OtpScreenState extends State<OtpScreen> {
                       TextSpan(text: '${s.otpSentTo} ', style: text.bodyMedium),
                       TextSpan(
                         text: draft.otpTarget,
-                        style: AppTypography.numeric(
-                          size: 15,
-                          weight: FontWeight.w600,
-                          spacing: 0.4,
-                        ),
+                        // A masked address is read as a word; only a number
+                        // earns the tabular face.
+                        style: byEmail
+                            ? text.bodyLarge?.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              )
+                            : AppTypography.numeric(
+                                size: 15,
+                                weight: FontWeight.w600,
+                                spacing: 0.4,
+                              ),
                       ),
                     ],
                   ),
                   textAlign: TextAlign.center,
                 ),
-
-                TextButton(
-                  onPressed: () => Navigator.of(context).maybePop(),
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(0, 40),
-                    padding: const EdgeInsets.symmetric(horizontal: Gap.md),
-                  ),
-                  child: Text(s.change),
-                ),
               ],
             ),
           ),
 
-          Gap.h16,
+          Gap.h24,
           FadeSlideIn(
             delay: const Duration(milliseconds: 220),
             child: OtpField(

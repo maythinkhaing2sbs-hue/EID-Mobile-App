@@ -102,8 +102,9 @@ void main() {
       await tester.pumpWidget(wrapScreen(
         const AuthScreen(initialMode: AuthMode.signUp),
         wallet: wallet,
-        // Submitting pushes the OTP screen, whose resend countdown would still
-        // be running at teardown. This test is about the draft, not the route.
+        // Nothing should be pushed at all — the assertion below depends on
+        // that — but a stub keeps a regression here as a failed expectation
+        // rather than as a stray timer at teardown.
         onGenerateRoute: (settings) =>
             MaterialPageRoute<dynamic>(builder: (_) => const SizedBox()),
       ));
@@ -130,6 +131,46 @@ void main() {
       expect(wallet.draft.nameMy, isEmpty);
       expect(wallet.draft.email, 'aung.ko@example.com');
       expect(wallet.draft.uid, 'UID12345678');
+    });
+
+    testWidgets('sign-up confirms, then hands back to the sign-in form',
+        (tester) async {
+      await setPhoneSurface(tester);
+      await tester.pumpWidget(wrapScreen(
+        const AuthScreen(initialMode: AuthMode.signUp),
+        // Creating an account must not walk into verification. If it ever
+        // does, this route stub is what the test lands on and the sign-in
+        // form below is nowhere to be found.
+        onGenerateRoute: (settings) =>
+            MaterialPageRoute<dynamic>(builder: (_) => const SizedBox()),
+      ));
+
+      await tester.enterText(
+          find.widgetWithText(TextFormField, my.fieldFullName), 'Aung Ko Ko');
+      await tester.enterText(find.widgetWithText(TextFormField, my.fieldEmail),
+          'aung.ko@example.com');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, my.fieldPhone), '9 123 456 789');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, my.fieldUidNumber), 'UID12345678');
+      await tester.pumpAndSettle();
+
+      final submit = find.widgetWithText(FilledButton, my.authTabSignUp);
+      await tester.ensureVisible(submit);
+      await tester.pumpAndSettle();
+      await tester.tap(submit);
+      await tester.pumpAndSettle();
+
+      expect(find.text(my.authSignUpDoneTitle), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(FilledButton, my.authTabSignIn));
+      await tester.pumpAndSettle();
+
+      // Back on the sign-in form: three fields, no name, and what was typed
+      // is still there so signing in is not a second round of typing.
+      expect(find.text(my.authSignUpDoneTitle), findsNothing);
+      expect(find.byType(AuthField), findsNWidgets(3));
+      expect(find.text('aung.ko@example.com'), findsOneWidget);
     });
   });
 
@@ -235,13 +276,17 @@ void main() {
       );
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, my.continueLabel));
-      await tester.pumpAndSettle();
+      // Not settled: the OTP screen this lands on keeps its icon animating
+      // while the user waits for the code, so there is no rest to wait for.
+      for (var i = 0; i < 6; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
 
       expect(wallet.draft.method, RegistrationMethod.email);
       expect(wallet.draft.email, 'aung.ko@example.com');
 
-      // Continue lands on the OTP screen, which starts a 45-second resend
-      // countdown; drain it so no timer is pending at teardown.
+      // The OTP screen also starts a 45-second resend countdown; drain it so
+      // no timer is pending at teardown.
       for (var i = 0; i < 50; i++) {
         await tester.pump(const Duration(seconds: 1));
       }
@@ -249,12 +294,18 @@ void main() {
   });
 
   group('PIN setup', () {
+    // Pumped by hand rather than settled: the lock badge on this screen
+    // animates for as long as the screen is up, so `pumpAndSettle` would
+    // wait for a rest that never comes. Half a second covers the stage
+    // hand-off and every transition it triggers.
     Future<void> enter(WidgetTester tester, String pin) async {
       for (final digit in pin.split('')) {
         await tester.tap(find.widgetWithText(GestureDetector, digit).first);
         await tester.pump();
       }
-      await tester.pumpAndSettle();
+      for (var i = 0; i < 5; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
     }
 
     testWidgets('refuses an obvious PIN before asking for confirmation',
@@ -317,11 +368,11 @@ void main() {
       await tester.pumpWidget(wrapScreen(const WalletReadyScreen()));
 
       expect(find.text(my.readyTitle), findsOneWidget);
-      expect(find.text(my.readyStepPhone), findsOneWidget);
+      expect(find.text(my.readyStepEmail), findsOneWidget);
       expect(find.text(my.readyStepPin), findsOneWidget);
       // The action leads into key creation, not into the wallet: the wallet
       // is not usable until the holder key exists.
-      expect(find.text(my.secureWalletCta), findsOneWidget);
+      expect(find.text(my.goToKeyPair), findsOneWidget);
     });
   });
 }

@@ -15,7 +15,7 @@ import '../core/theme/app_typography.dart';
 ///
 /// Like [AppTextField], [numeric] switches the *input* face to Roboto Slab so a
 /// phone number or UID is read digit-by-digit even in the Myanmar locale.
-class AuthField extends StatelessWidget {
+class AuthField extends StatefulWidget {
   const AuthField({
     super.key,
     required this.icon,
@@ -43,6 +43,9 @@ class AuthField extends StatelessWidget {
   final String? Function(String?)? validator;
   final List<TextInputFormatter>? inputFormatters;
   final bool numeric;
+
+  /// Fixed text in front of the value — the dial code on a phone field.
+  /// Revealed only once the field is in use; see [_AuthFieldState._syncPrefix].
   final String? prefix;
 
   /// Format hint that must stay visible while the field is being filled —
@@ -53,7 +56,54 @@ class AuthField extends StatelessWidget {
   final Iterable<String>? autofillHints;
   final int? maxLength;
 
+  @override
+  State<AuthField> createState() => _AuthFieldState();
+}
+
+class _AuthFieldState extends State<AuthField> {
+  /// Owned rather than injected: the only thing this field needs a node for is
+  /// knowing when to show [AuthField.prefix].
+  final FocusNode _focus = FocusNode();
+
+  bool _showPrefix = false;
+
   static const Color _fill = Color(0xFFF4F6FA);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.prefix == null) return;
+    _showPrefix = widget.controller?.text.isNotEmpty ?? false;
+    _focus.addListener(_syncPrefix);
+    widget.controller?.addListener(_syncPrefix);
+  }
+
+  @override
+  void didUpdateWidget(AuthField old) {
+    super.didUpdateWidget(old);
+    if (old.controller == widget.controller) return;
+    old.controller?.removeListener(_syncPrefix);
+    if (widget.prefix != null) widget.controller?.addListener(_syncPrefix);
+  }
+
+  @override
+  void dispose() {
+    widget.controller?.removeListener(_syncPrefix);
+    _focus.dispose();
+    super.dispose();
+  }
+
+  /// Material keeps the prefix's width reserved while it is faded out, which
+  /// on a column of otherwise identical capsules leaves the phone field's
+  /// placeholder standing a dial code to the right of the email and UID ones.
+  /// Handing the decoration a null prefix until there is something to prefix
+  /// keeps the three placeholders on one line at rest; the dial code appears
+  /// the moment the field is focused or holds a number.
+  void _syncPrefix() {
+    final show =
+        _focus.hasFocus || (widget.controller?.text.isNotEmpty ?? false);
+    if (show != _showPrefix) setState(() => _showPrefix = show);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,28 +125,29 @@ class AuthField extends StatelessWidget {
         );
 
     return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      textInputAction: textInputAction,
-      validator: validator,
-      inputFormatters: inputFormatters,
-      autofillHints: autofillHints,
-      maxLength: maxLength,
+      controller: widget.controller,
+      focusNode: _focus,
+      keyboardType: widget.keyboardType,
+      textInputAction: widget.textInputAction,
+      validator: widget.validator,
+      inputFormatters: widget.inputFormatters,
+      autofillHints: widget.autofillHints,
+      maxLength: widget.maxLength,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       cursorColor: AppColors.primary,
-      style: numeric
+      style: widget.numeric
           ? AppTypography.numeric(
               size: fontSize, weight: FontWeight.w500, spacing: 0.3)
           : text.bodyLarge?.copyWith(fontSize: fontSize),
       decoration: InputDecoration(
-        hintText: hint,
+        hintText: widget.hint,
         labelText: null,
-        helperText: helper,
+        helperText: widget.helper,
         counterText: '',
-        prefixText: prefix,
+        prefixText: _showPrefix ? widget.prefix : null,
         prefixStyle: AppTypography.numeric(
             size: fontSize, color: AppColors.textSecondary),
-        prefixIcon: Icon(icon,
+        prefixIcon: Icon(widget.icon,
             size: isMyanmar ? 18 : 20, color: AppColors.textTertiary),
         prefixIconConstraints:
             const BoxConstraints(minWidth: 46, minHeight: 46),

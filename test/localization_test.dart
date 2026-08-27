@@ -77,20 +77,20 @@ void main() {
       await setPhoneSurface(tester);
       await tester.pumpWidget(wrapScreen(const WelcomeScreen()));
 
-      expect(find.text(my.welcomeTitle), findsOneWidget);
-      expect(find.text(en.welcomeTitle), findsNothing);
+      expect(find.text(my.welcomeTitle, findRichText: true), findsOneWidget);
+      expect(find.text(en.welcomeTitle, findRichText: true), findsNothing);
 
       await tester.tap(find.text('English'));
       await tester.pumpAndSettle();
 
-      expect(find.text(en.welcomeTitle), findsOneWidget);
+      expect(find.text(en.welcomeTitle, findRichText: true), findsOneWidget);
       expect(find.text(en.letsGetStarted), findsOneWidget);
-      expect(find.text(my.welcomeTitle), findsNothing);
+      expect(find.text(my.welcomeTitle, findRichText: true), findsNothing);
 
       await tester.tap(find.text('မြန်မာ'));
       await tester.pumpAndSettle();
 
-      expect(find.text(my.welcomeTitle), findsOneWidget);
+      expect(find.text(my.welcomeTitle, findRichText: true), findsOneWidget);
     });
   });
 }
@@ -113,6 +113,7 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.needHelp,
   (s) => s.security,
   (s) => s.welcomeTitle,
+  (s) => s.welcomeTitleAccent,
   (s) => s.letsGetStarted,
   (s) => s.issuedByGovernment,
   (s) => s.authTabSignIn,
@@ -121,8 +122,8 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.authSignInHeadlineSub,
   (s) => s.authSignUpHeadline,
   (s) => s.authSignUpHeadlineSub,
-  (s) => s.authNoAccount,
-  (s) => s.authHaveAccount,
+  (s) => s.authSignUpDoneTitle,
+  (s) => s.authSignUpDoneBody,
   (s) => s.fieldFullName,
   (s) => s.fieldUidNumber,
   (s) => s.errUidNumber,
@@ -159,9 +160,9 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.pinNeverShare,
   (s) => s.readyTitle,
   (s) => s.readySubtitle,
-  (s) => s.readyStepPhone,
+  (s) => s.readyStepEmail,
   (s) => s.readyStepPin,
-  (s) => s.secureWalletCta,
+  (s) => s.goToKeyPair,
   (s) => s.goToWalletHome,
   (s) => s.keyIntroTitle,
   (s) => s.keyIntroBody,
