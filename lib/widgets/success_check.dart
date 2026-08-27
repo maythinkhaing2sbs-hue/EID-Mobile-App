@@ -176,8 +176,12 @@ class SuccessLayout extends StatelessWidget {
   }
 }
 
-/// A single line in a "what is happening right now" list — used while the
-/// issuer signs a credential and while the reader verifies one.
+/// A single line in a "what is happening right now" list, used while the
+/// issuer signs a credential.
+///
+/// The step in flight is lifted onto a tinted pill rather than only being set
+/// in bold: on a list of five near-identical lines, weight alone is too quiet
+/// to answer "where is it now?" at a glance from arm's length.
 enum StepStatus { pending, active, done }
 
 class ProcessStep extends StatelessWidget {
@@ -202,8 +206,16 @@ class ProcessStep extends StatelessWidget {
           size: 20, color: AppColors.borderStrong),
     };
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 9),
+    final active = status == StepStatus.active;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOut,
+      padding: const EdgeInsets.symmetric(horizontal: Gap.md, vertical: 9),
+      decoration: BoxDecoration(
+        color: active ? AppColors.secondary : Colors.transparent,
+        borderRadius: Radii.fieldAll,
+      ),
       child: Row(
         children: [
           SizedBox(width: 20, height: 20, child: Center(child: leading)),
@@ -216,9 +228,7 @@ class ProcessStep extends StatelessWidget {
                 color: status == StepStatus.pending
                     ? AppColors.textTertiary
                     : AppColors.textPrimary,
-                fontWeight: status == StepStatus.active
-                    ? FontWeight.w600
-                    : FontWeight.w400,
+                fontWeight: active ? FontWeight.w600 : FontWeight.w400,
               ),
               child: Text(label),
             ),

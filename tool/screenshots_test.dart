@@ -9,6 +9,7 @@
 
 import 'dart:io';
 
+import 'package:eid_wallet/app.dart';
 import 'package:eid_wallet/core/l10n/app_strings.dart';
 import 'package:eid_wallet/core/l10n/locale_controller.dart';
 import 'package:eid_wallet/core/models/wallet_models.dart';
@@ -143,6 +144,7 @@ Widget _harness(Widget child, WalletState wallet, Locale locale) {
           GlobalCupertinoLocalizations.delegate,
         ],
         onGenerateRoute: Routes.onGenerateRoute,
+        scrollBehavior: const AppScrollBehavior(),
         // Mirrors the production builder so previews reflect the shipped tree.
         builder: (context, child) =>
             AppTextScaleClamp(child: child ?? const SizedBox.shrink()),

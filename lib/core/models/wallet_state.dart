@@ -16,6 +16,9 @@ class WalletState extends ChangeNotifier {
   HolderKey? holderKey;
   final List<WalletCredential> credentials = [];
 
+  /// Completed presentations, newest first.
+  final List<ActivityEntry> activity = [];
+
   bool get isRegistered => _pin != null;
   bool get hasHolderKey => holderKey != null;
 
@@ -75,6 +78,24 @@ class WalletState extends ChangeNotifier {
     return credential;
   }
 
+  /// Records a completed presentation on the holder's own audit trail.
+  void recordPresentation({
+    required String verifierName,
+    required CredentialKind kind,
+    required int claimCount,
+  }) {
+    activity.insert(
+      0,
+      ActivityEntry(
+        verifierName: verifierName,
+        kind: kind,
+        claimCount: claimCount,
+        at: DateTime.now(),
+      ),
+    );
+    notifyListeners();
+  }
+
   /// Seeds a second credential so the "Choose Credential" screen has something
   /// to choose between.
   void seedDemoCredentials() {
@@ -87,6 +108,10 @@ class WalletState extends ChangeNotifier {
       // would ever set this — and the unlock keypad would never offer its
       // biometric key. The demo session opts in on the user's behalf.
       biometricsEnabled = true;
+      // A wallet seeded with credentials it never received should also carry
+      // the history it never made, or the home screen's activity list reads as
+      // broken rather than empty.
+      activity.addAll(ActivityEntry.samples);
       notifyListeners();
     }
   }

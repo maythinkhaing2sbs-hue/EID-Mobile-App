@@ -146,7 +146,6 @@ class AppStrings {
   String get whatYouGet => _s('whatYouGet');
   String get whatYouGetHint => _s('whatYouGetHint');
   String get issuerVerified => _s('issuerVerified');
-  String get keyRequiredFirst => _s('keyRequiredFirst');
   String get requestCredential => _s('requestCredential');
   String get issuingTitle => _s('issuingTitle');
   String get stepAuthorize => _s('stepAuthorize');
@@ -174,6 +173,8 @@ class AppStrings {
   String get chooseCredentialTitle => _s('chooseCredentialTitle');
   String get chooseCredentialSubtitle => _s('chooseCredentialSubtitle');
   String get issuedBy => _s('issuedBy');
+  String get credentialMatches => _s('credentialMatches');
+  String get credentialMissing => _s('credentialMissing');
   String validUntil(String date) => _s('validUntil').replaceFirst('{d}', date);
 
   // ── 12. Confirm & share ─────────────────────────────────────────────────
@@ -183,6 +184,7 @@ class AppStrings {
   String consentText(String verifier) =>
       _s('consentText').replaceFirst('{v}', verifier);
   String get consentRequired => _s('consentRequired');
+  String get whatYouShare => _s('whatYouShare');
   String get sentSecurely => _s('sentSecurely');
 
   // ── 13. Reading data ────────────────────────────────────────────────────
@@ -213,6 +215,11 @@ class AppStrings {
 
   // ── Home ────────────────────────────────────────────────────────────────
   String get homeGreeting => _s('homeGreeting');
+  String get homeProtected => _s('homeProtected');
+  String get recentActivity => _s('recentActivity');
+  String get activityEmpty => _s('activityEmpty');
+  String activityShared(int n) =>
+      _s('activityShared').replaceFirst('{n}', '$n');
   String get myCredentials => _s('myCredentials');
   String get quickActions => _s('quickActions');
   String get actionScan => _s('actionScan');
@@ -339,7 +346,6 @@ class AppStrings {
     'whatYouGetHint':
         'ဤတန်ဖိုးများအတိုင်း ထုတ်ပေးသူက လက်မှတ်ရေးထိုး ထုတ်ပေးပါမည်။',
     'issuerVerified': 'အတည်ပြုပြီး ထုတ်ပေးသူ',
-    'keyRequiredFirst': 'အထောက်အထား မတောင်းခံမီ သော့ကို အရင်ဖန်တီးပါ။',
     'requestCredential': 'အထောက်အထား တောင်းခံရန်',
     'issuingTitle': 'သင့်အထောက်အထားကို ဖန်တီးနေပါသည်',
     'stepAuthorize': 'ထုတ်ပေးသူထံ ခွင့်ပြုချက် တောင်းခံခြင်း',
@@ -364,6 +370,8 @@ class AppStrings {
     'chooseCredentialTitle': 'အထောက်အထား ရွေးချယ်ပါ',
     'chooseCredentialSubtitle': 'တင်ပြရန် အထောက်အထားတစ်ခုကို ရွေးပါ။',
     'issuedBy': 'ထုတ်ပေးသူ',
+    'credentialMatches': 'တောင်းဆိုထားသည့် အချက်အလက် အားလုံး ပါဝင်သည်',
+    'credentialMissing': 'တောင်းဆိုထားသည့် အချက်အလက် အချို့ မပါဝင်ပါ',
     'validUntil': '{d} အထိ သက်တမ်းရှိသည်',
 
     'confirmShareTitle': 'အတည်ပြုပြီး မျှဝေပါ',
@@ -371,6 +379,7 @@ class AppStrings {
     'consentText':
         'အထက်ပါ အချက်အလက်များကို {v} သို့ မျှဝေရန် ကျွန်ုပ် သဘောတူပါသည်။',
     'consentRequired': 'ဆက်လက် ဆောင်ရွက်ရန် သဘောတူညီချက် လိုအပ်ပါသည်။',
+    'whatYouShare': 'မျှဝေမည့် အချက်အလက်များ',
     'sentSecurely': 'အချက်အလက်များကို ကုဒ်ဝှက်ပြီး လုံခြုံစွာ ပေးပို့ပါမည်။',
 
     'readingTitle': 'အချက်အလက် ဖတ်ယူနေသည်…',
@@ -397,6 +406,10 @@ class AppStrings {
     'attrPhoto': 'ဓာတ်ပုံ',
 
     'homeGreeting': 'မင်္ဂလာပါ',
+    'homeProtected': 'ကာကွယ်ထားသည်',
+    'recentActivity': 'မကြာသေးမီက မျှဝေမှုများ',
+    'activityShared': 'အချက်အလက် {n} ခု မျှဝေခဲ့သည်',
+    'activityEmpty': 'မျှဝေမှု မှတ်တမ်း မရှိသေးပါ။',
     'myCredentials': 'ကျွန်ုပ်၏ အထောက်အထားများ',
     'quickActions': 'အမြန် လုပ်ဆောင်ချက်များ',
     'actionScan': 'QR စကင်ဖတ်ရန်',
@@ -525,7 +538,6 @@ class AppStrings {
     'whatYouGetHint':
         'These are the exact values the issuer will sign into your credential.',
     'issuerVerified': 'Verified issuer',
-    'keyRequiredFirst': 'Create it first to bind your credential.',
     'requestCredential': 'Request Credential',
     'issuingTitle': 'Creating your credential',
     'stepAuthorize': 'Requesting authorization from the issuer',
@@ -551,12 +563,15 @@ class AppStrings {
     'chooseCredentialTitle': 'Choose Credential',
     'chooseCredentialSubtitle': 'Select the credential you want to present.',
     'issuedBy': 'Issued by',
+    'credentialMatches': 'Has every requested detail',
+    'credentialMissing': 'Missing some requested details',
     'validUntil': 'Valid until {d}',
 
     'confirmShareTitle': 'Confirm & Share',
     'confirmShareSubtitle': 'You are about to send the following to {v}.',
     'consentText': 'I agree to share the information above with {v}.',
     'consentRequired': 'Your consent is required to continue.',
+    'whatYouShare': 'What you will share',
     'sentSecurely': 'Data will be encrypted and sent securely.',
 
     'readingTitle': 'Reading Data…',
@@ -583,6 +598,10 @@ class AppStrings {
     'attrPhoto': 'Photo',
 
     'homeGreeting': 'Hello',
+    'homeProtected': 'Protected',
+    'recentActivity': 'Recent shares',
+    'activityShared': '{n} details shared',
+    'activityEmpty': 'Nothing shared yet.',
     'myCredentials': 'My Credentials',
     'quickActions': 'Quick actions',
     'actionScan': 'Scan QR',
