@@ -354,7 +354,9 @@ class AppStrings {
     'keyIntroTitle': 'သင့် Wallet ကို လုံခြုံအောင် ပြုလုပ်ခြင်း',
     'keyIntroBody':
         'အထောက်အထားများ လက်ခံရယူရန် Holder Key Pair တစ်ခု ဖန်တီးရပါမည်။ ၎င်းသည် သင့်ဒစ်ဂျစ်တယ် လက်မှတ်ဖြစ်ပြီး အထောက်အထားကို သင်ပိုင်ဆိုင်ကြောင်း သက်သေပြပေးပါသည်။',
-    'keyPointPrivate': 'Private Key သည် ဤဖုန်းထဲမှ ဘယ်တော့မှ ထွက်မသွားပါ။',
+    'keyPointPrivate':
+        'Private Key ကို ဖုန်းအတွင်းမှ ကူးယူ၍ မရသလို App ကိုယ်တိုင်ကလည်း '
+        'ဖတ်၍ မရပါ။',
     'keyPointBinding': 'အထောက်အထားကို ဤသော့နှင့် တွဲချည်ထားပါသည် (PoP)။',
     'keyPointSign': 'တင်ပြသည့်အခါတိုင်း သင့်သော့ဖြင့် လက်မှတ်ရေးထိုးပါသည်။',
     'createKeyPair': 'Holder Key Pair ဖန်တီးရန်',
@@ -572,7 +574,9 @@ class AppStrings {
     'keyIntroTitle': 'Securing your Wallet',
     'keyIntroBody':
         'To receive credentials, your wallet creates a Holder Key Pair. It acts as your digital signature and proves the credential belongs to you.',
-    'keyPointPrivate': 'The private key never leaves this device.',
+    'keyPointPrivate':
+        'The private key cannot be copied out of the phone, and the app '
+        'itself cannot read it.',
     'keyPointBinding':
         'Your credential is bound to this key (Proof of Possession).',
     'keyPointSign': 'Every presentation is signed with your key.',
