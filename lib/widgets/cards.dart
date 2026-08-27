@@ -318,6 +318,96 @@ class ClaimRow extends StatelessWidget {
   }
 }
 
+/// One claim printed in full: the field name on the left, the value that will
+/// actually be signed or shared on the right.
+///
+/// Hairline-separated rather than boxed — five bordered tiles read as five
+/// separate objects, and this is one record. Consent to "Date of Birth" is not
+/// informed consent; consent to "Date of Birth — 1990-05-15" is, so every
+/// screen that asks the holder to approve a set of claims uses this row.
+class ClaimValueRow extends StatelessWidget {
+  const ClaimValueRow({
+    super.key,
+    required this.label,
+    required this.value,
+    this.tabular = false,
+    this.first = false,
+  });
+
+  final String label;
+  final String value;
+
+  /// Renders the value in the tabular-figure face — dates, numbers, IDs.
+  final bool tabular;
+
+  /// The first row sits directly under the section label and needs no rule
+  /// above it.
+  final bool first;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+
+    return Column(
+      children: [
+        if (!first)
+          const Divider(height: 1, thickness: 1, color: AppColors.divider),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: Gap.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 2),
+                child: Icon(Icons.check_circle_rounded,
+                    size: 16, color: AppColors.success),
+              ),
+              Gap.w8,
+              Expanded(
+                flex: 4,
+                child: Text(label, style: text.bodySmall),
+              ),
+              Gap.w12,
+              Expanded(
+                flex: 5,
+                child: Text(
+                  value,
+                  textAlign: TextAlign.end,
+                  style: tabular
+                      ? AppTypography.numeric(size: 14, weight: FontWeight.w600)
+                      : text.titleSmall
+                          ?.copyWith(color: AppColors.textPrimary),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The credential format - SD-JWT VC, ISO mdoc. Set in the mono face because it
+/// is a technical fact, marked as one, so it never competes with the human
+/// label beside it.
+class FormatChip extends StatelessWidget {
+  const FormatChip({super.key, required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceSunken,
+        borderRadius: Radii.pill,
+      ),
+      child: Text(label, style: AppTypography.mono(size: 11)),
+    );
+  }
+}
+
 /// Status chip: success / pending / warning.
 enum BadgeTone { success, info, warning, danger }
 
@@ -438,7 +528,10 @@ class CredentialCard extends StatelessWidget {
                   ?.copyWith(color: Colors.white),
             ),
             if (!compact) ...[
-              Gap.h24,
+              // Tight against the document name above it: the two lines are one
+              // block - what this is, then whose it is - and the wide gap that
+              // used to sit here read as an empty field rather than as air.
+              Gap.h8,
               Text(
                 holder.toUpperCase(),
                 style: AppTypography.numeric(

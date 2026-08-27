@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/auth_screen.dart';
 import '../../features/credential/credential_issuing_screen.dart';
 import '../../features/credential/request_credential_screen.dart';
 import '../../features/home/wallet_home_screen.dart';
@@ -26,6 +27,10 @@ import '../models/wallet_models.dart';
 /// generator keeps argument types checked without a codegen step.
 abstract final class Routes {
   static const welcome = '/';
+
+  /// Sign in / create account. Takes an optional [AuthMode] argument to open
+  /// on a specific tab; defaults to sign-in.
+  static const auth = '/auth';
   static const unlock = '/unlock';
   static const home = '/home';
 
@@ -62,6 +67,10 @@ abstract final class Routes {
     switch (settings.name) {
       case welcome:
         return page(const WelcomeScreen());
+      case auth:
+        return page(AuthScreen(
+          initialMode: _arg<AuthMode>(settings) ?? AuthMode.signIn,
+        ));
       case unlock:
         return page(const UnlockScreen());
       case home:

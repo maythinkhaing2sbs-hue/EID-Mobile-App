@@ -6,18 +6,18 @@ import '../../core/models/wallet_state.dart';
 import '../../core/router/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
-import '../../core/theme/app_typography.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/brand_panel.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/cards.dart';
 
-/// Screen 9 — request the credential (OpenID4VCI).
+/// Screen 9 - request the credential (OpenID4VCI).
 ///
 /// The screen answers three questions before the user commits: what credential,
-/// from which issuer, and exactly which claims — *with their values* — it will
+/// from which issuer, and exactly which claims - with their values - it will
 /// contain. Showing the values rather than a checklist of field names is the
 /// point: consent to "Date of Birth" is not informed consent; consent to
-/// "Date of Birth — 1990-05-15" is, and this is the last moment the holder can
+/// "Date of Birth - 1990-05-15" is, and this is the last moment the holder can
 /// spot a wrong record before the issuer signs it.
 ///
 /// If the holder key does not exist yet, the primary action routes to key
@@ -35,15 +35,6 @@ class RequestCredentialScreen extends StatelessWidget {
     ClaimId.documentNumber,
     ClaimId.expiryDate,
   ];
-
-  /// Codes, numbers and ISO dates get the tabular face so they line up in a
-  /// column; names and free text stay in the body face.
-  static const Set<ClaimId> _tabular = {
-    ClaimId.dateOfBirth,
-    ClaimId.nationality,
-    ClaimId.documentNumber,
-    ClaimId.expiryDate,
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -86,13 +77,13 @@ class RequestCredentialScreen extends StatelessWidget {
                     children: [
                       SectionLabel(
                         s.whatYouGet,
-                        trailing: _FormatChip(label: credential.format),
+                        trailing: FormatChip(label: credential.format),
                       ),
                       for (final claim in _claims)
-                        _ClaimValueRow(
+                        ClaimValueRow(
                           label: claim.label(s),
                           value: credential.claims[claim] ?? '-',
-                          tabular: _tabular.contains(claim),
+                          tabular: claim.isTabular,
                           first: claim == _claims.first,
                         ),
                       Gap.h12,
@@ -110,8 +101,15 @@ class RequestCredentialScreen extends StatelessWidget {
             ),
           ),
 
-          Gap.h16,
-          _HolderKeyCard(holderKey: wallet.holderKey),
+          // Only shown once the key exists, as a confirmation. A card that
+          // announces a missing key would be raising an alarm the user cannot
+          // act on from here - the primary button already changes to
+          // "Create Holder Key Pair" and takes them to the one screen that
+          // fixes it.
+          if (wallet.holderKey case final key?) ...[
+            Gap.h16,
+            _HolderKeyCard(holderKey: key),
+          ],
 
           Gap.h16,
           InfoNote(text: s.keyPointBinding, icon: Icons.link_rounded),
@@ -123,46 +121,63 @@ class RequestCredentialScreen extends StatelessWidget {
 
 /// Issuer identity, given the top slab of the card so "who is signing this?"
 /// is answered before any of the data below it.
+///
+/// Painted in the brand gradient rather than left white: this is the one object
+/// on screen that will become a government ID, and the header is the preview
+/// of it.
 class _IssuerHeader extends StatelessWidget {
   const _IssuerHeader({required this.credential});
 
   final WalletCredential credential;
 
+  /// The document, not the ministry behind it: the issuer is already named on
+  /// the line below, so a building here would say the same thing twice and
+  /// leave the card itself unillustrated.
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
     final text = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.all(Gap.xl),
+    return BrandPanel(
+      borderRadius: const BorderRadius.vertical(top: Radii.card),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             height: 48,
             width: 48,
-            decoration: const BoxDecoration(
-              color: AppColors.secondary,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.18),
               borderRadius: Radii.fieldAll,
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.22),
+              ),
             ),
-            child: const Icon(Icons.account_balance_rounded,
-                color: AppColors.primary),
+            child: Icon(credential.kind.icon,
+                color: AppColors.textOnPrimary),
           ),
           Gap.w12,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(credential.kind.label(s), style: text.titleMedium),
+                Text(
+                  credential.kind.label(s),
+                  style:
+                      text.titleMedium?.copyWith(color: AppColors.textOnPrimary),
+                ),
                 Gap.h4,
-                Text(credential.issuerName(s), style: text.bodySmall),
+                Text(
+                  credential.issuerName(s),
+                  style: text.bodySmall
+                      ?.copyWith(color: Colors.white.withValues(alpha: 0.8)),
+                ),
                 Gap.h12,
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: StatusBadge(
+                  child: GlassBadge(
                     label: s.issuerVerified,
                     icon: Icons.verified_rounded,
-                    tone: BadgeTone.info,
                   ),
                 ),
               ],
@@ -174,101 +189,20 @@ class _IssuerHeader extends StatelessWidget {
   }
 }
 
-/// The credential format, set in the mono face — a technical fact, marked as
-/// one, so it never competes with the issuer name beside it.
-class _FormatChip extends StatelessWidget {
-  const _FormatChip({required this.label});
 
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: const BoxDecoration(
-        color: AppColors.surfaceSunken,
-        borderRadius: Radii.pill,
-      ),
-      child: Text(label, style: AppTypography.mono(size: 11)),
-    );
-  }
-}
-
-/// One claim: the field name on the left, the value that will actually be
-/// signed on the right. Hairline-separated rather than boxed — five bordered
-/// tiles read as five separate objects, and this is one record.
-class _ClaimValueRow extends StatelessWidget {
-  const _ClaimValueRow({
-    required this.label,
-    required this.value,
-    required this.tabular,
-    required this.first,
-  });
-
-  final String label;
-  final String value;
-  final bool tabular;
-
-  /// The first row sits directly under the section label and needs no rule
-  /// above it.
-  final bool first;
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-
-    return Column(
-      children: [
-        if (!first)
-          const Divider(height: 1, thickness: 1, color: AppColors.divider),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: Gap.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 2),
-                child: Icon(Icons.check_circle_rounded,
-                    size: 16, color: AppColors.success),
-              ),
-              Gap.w8,
-              Expanded(
-                flex: 4,
-                child: Text(label, style: text.bodySmall),
-              ),
-              Gap.w12,
-              Expanded(
-                flex: 5,
-                child: Text(
-                  value,
-                  textAlign: TextAlign.end,
-                  style: tabular
-                      ? AppTypography.numeric(size: 14, weight: FontWeight.w600)
-                      : text.titleSmall
-                          ?.copyWith(color: AppColors.textPrimary),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Holder-key readiness. The credential cannot be bound without it, so the row
-/// names the algorithm once the key exists and says what to do when it does
-/// not — the primary button changes to match.
+/// The holder key, once it exists - a quiet confirmation that the credential
+/// has something to bind to. The screen omits this card entirely while the key
+/// is missing rather than showing a warning: the state is expected at this
+/// point in the flow, and the primary button is already the way out of it.
 class _HolderKeyCard extends StatelessWidget {
   const _HolderKeyCard({required this.holderKey});
 
-  final HolderKey? holderKey;
+  final HolderKey holderKey;
 
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
     final text = Theme.of(context).textTheme;
-    final ready = holderKey != null;
 
     return AppCard(
       padding:
@@ -278,16 +212,12 @@ class _HolderKeyCard extends StatelessWidget {
           Container(
             height: 36,
             width: 36,
-            decoration: BoxDecoration(
-              color:
-                  ready ? AppColors.successSurface : AppColors.warningSurface,
+            decoration: const BoxDecoration(
+              color: AppColors.successSurface,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              ready ? Icons.check_rounded : Icons.priority_high_rounded,
-              size: 18,
-              color: ready ? AppColors.success : AppColors.warning,
-            ),
+            child: const Icon(Icons.check_rounded,
+                size: 18, color: AppColors.success),
           ),
           Gap.w12,
           Expanded(
@@ -296,18 +226,12 @@ class _HolderKeyCard extends StatelessWidget {
               children: [
                 Text(s.holderKey, style: text.titleMedium),
                 Gap.h4,
-                Text(
-                  ready ? holderKey!.algorithm : s.keyRequiredFirst,
-                  style: text.bodySmall,
-                ),
+                Text(holderKey.algorithm, style: text.bodySmall),
               ],
             ),
           ),
           Gap.w8,
-          StatusBadge(
-            label: ready ? s.keyActive : s.keyStatusNotCreated,
-            tone: ready ? BadgeTone.success : BadgeTone.warning,
-          ),
+          StatusBadge(label: s.keyActive),
         ],
       ),
     );

@@ -28,6 +28,37 @@ void main() {
       }
     });
 
+    testWidgets('View details opens the record, not the plumbing',
+        (tester) async {
+      await setPhoneSurface(tester);
+      await tester.pumpWidget(wrapScreen(
+        const ReviewRequestScreen(request: request),
+        wallet: WalletState()..seedDemoCredentials(),
+      ));
+
+      // Drag the list up rather than scrollUntilVisible: the link sits low
+      // enough to be behind the pinned action bar, where it is "visible" but
+      // not tappable.
+      await tester.drag(find.byType(ListView), const Offset(0, -320));
+      // Explicit pumps, not pumpAndSettle: the requester card's sheen repeats
+      // forever, so the frame queue never empties.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.tap(find.text(my.viewDetails));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // The address is on the credential but not in the request: the sheet
+      // shows the whole document, which is the reason it exists.
+      expect(find.text(my.attrAddress), findsOneWidget);
+      expect(find.text(my.issuer), findsOneWidget);
+
+      // The endpoint and protocol rows used to live here and told the holder
+      // nothing they could act on.
+      expect(find.text('response_uri'), findsNothing);
+      expect(find.text('Protocol'), findsNothing);
+    });
+
     testWidgets('offers Decline as a real, reachable choice', (tester) async {
       await setPhoneSurface(tester);
       await tester.pumpWidget(
@@ -184,7 +215,17 @@ void main() {
       await wallet.issueCredential();
       await wallet.issueCredential();
 
-      expect(wallet.credentials.length, 1);
+      // The National ID plus the passport the wallet is assumed to already
+      // hold — stored once each, however often the flow is re-run.
+      expect(wallet.credentials.length, 2);
+      expect(
+        wallet.credentials.where((c) => c.kind == CredentialKind.nationalId),
+        hasLength(1),
+      );
+      expect(
+        wallet.credentials.where((c) => c.kind == CredentialKind.passport),
+        hasLength(1),
+      );
     });
 
     test('creating the holder key records a P-256 key', () async {

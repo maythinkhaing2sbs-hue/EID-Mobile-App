@@ -56,10 +56,26 @@ class AppStrings {
 
   // ── 1. Welcome ──────────────────────────────────────────────────────────
   String get welcomeTitle => _s('welcomeTitle');
-  String get welcomeSubtitle => _s('welcomeSubtitle');
-  String get createWallet => _s('createWallet');
-  String get signInExisting => _s('signInExisting');
+
+  /// The run inside [welcomeTitle] that carries the product's name, tinted
+  /// brand blue on the screen. Localised because the two scripts name the
+  /// wallet differently and place it at opposite ends of the sentence.
+  String get welcomeTitleAccent => _s('welcomeTitleAccent');
+  String get letsGetStarted => _s('letsGetStarted');
   String get issuedByGovernment => _s('issuedByGovernment');
+
+  // ── 1b. Sign in / Create account ────────────────────────────────────────
+  String get authTabSignIn => _s('authTabSignIn');
+  String get authTabSignUp => _s('authTabSignUp');
+  String get authSignInHeadline => _s('authSignInHeadline');
+  String get authSignInHeadlineSub => _s('authSignInHeadlineSub');
+  String get authSignUpHeadline => _s('authSignUpHeadline');
+  String get authSignUpHeadlineSub => _s('authSignUpHeadlineSub');
+  String get authSignUpDoneTitle => _s('authSignUpDoneTitle');
+  String get authSignUpDoneBody => _s('authSignUpDoneBody');
+  String get fieldFullName => _s('fieldFullName');
+  String get fieldUidNumber => _s('fieldUidNumber');
+  String get errUidNumber => _s('errUidNumber');
 
   // ── 2. Registration method + identifier ─────────────────────────────────
   String get registerMethodTitle => _s('registerMethodTitle');
@@ -102,9 +118,9 @@ class AppStrings {
   // ── 5. Wallet ready ─────────────────────────────────────────────────────
   String get readyTitle => _s('readyTitle');
   String get readySubtitle => _s('readySubtitle');
-  String get readyStepPhone => _s('readyStepPhone');
+  String get readyStepEmail => _s('readyStepEmail');
   String get readyStepPin => _s('readyStepPin');
-  String get secureWalletCta => _s('secureWalletCta');
+  String get goToKeyPair => _s('goToKeyPair');
   String get goToWalletHome => _s('goToWalletHome');
 
   // ── 6–7. Holder key pair ────────────────────────────────────────────────
@@ -135,7 +151,6 @@ class AppStrings {
   String get whatYouGet => _s('whatYouGet');
   String get whatYouGetHint => _s('whatYouGetHint');
   String get issuerVerified => _s('issuerVerified');
-  String get keyRequiredFirst => _s('keyRequiredFirst');
   String get requestCredential => _s('requestCredential');
   String get issuingTitle => _s('issuingTitle');
   String get stepAuthorize => _s('stepAuthorize');
@@ -163,6 +178,8 @@ class AppStrings {
   String get chooseCredentialTitle => _s('chooseCredentialTitle');
   String get chooseCredentialSubtitle => _s('chooseCredentialSubtitle');
   String get issuedBy => _s('issuedBy');
+  String get credentialMatches => _s('credentialMatches');
+  String get credentialMissing => _s('credentialMissing');
   String validUntil(String date) => _s('validUntil').replaceFirst('{d}', date);
 
   // ── 12. Confirm & share ─────────────────────────────────────────────────
@@ -172,6 +189,7 @@ class AppStrings {
   String consentText(String verifier) =>
       _s('consentText').replaceFirst('{v}', verifier);
   String get consentRequired => _s('consentRequired');
+  String get whatYouShare => _s('whatYouShare');
   String get sentSecurely => _s('sentSecurely');
 
   // ── 13. Reading data ────────────────────────────────────────────────────
@@ -202,6 +220,11 @@ class AppStrings {
 
   // ── Home ────────────────────────────────────────────────────────────────
   String get homeGreeting => _s('homeGreeting');
+  String get homeProtected => _s('homeProtected');
+  String get recentActivity => _s('recentActivity');
+  String get activityEmpty => _s('activityEmpty');
+  String activityShared(int n) =>
+      _s('activityShared').replaceFirst('{n}', '$n');
   String get myCredentials => _s('myCredentials');
   String get quickActions => _s('quickActions');
   String get actionScan => _s('actionScan');
@@ -221,8 +244,8 @@ class AppStrings {
   // Myanmar — the default language of the app.
   // ═══════════════════════════════════════════════════════════════════════
   static const Map<String, String> _my = {
-    'appName': 'အမျိုးသား EID Wallet',
-    'appNameShort': 'EID Wallet',
+    'appName': 'အမျိုးသား eID Wallet',
+    'appNameShort': 'eID Wallet',
     'languageName': 'မြန်မာ',
     'continue': 'ဆက်လုပ်ရန်',
     'back': 'နောက်သို့',
@@ -238,12 +261,23 @@ class AppStrings {
     'security': 'လုံခြုံရေး',
     'stepOf': 'အဆင့် {a} / {b}',
 
-    'welcomeTitle': 'အမျိုးသား EID Wallet မှ ကြိုဆိုပါသည်',
-    'welcomeSubtitle':
-        'သင့်ဒစ်ဂျစ်တယ် မှတ်ပုံတင်ကို ဖုန်းအတွင်း လုံခြုံစွာ သိမ်းဆည်းပြီး လိုအပ်သည့်အခါတိုင်း တင်ပြနိုင်ပါသည်။',
-    'createWallet': 'Wallet အသစ် ဖန်တီးရန်',
-    'signInExisting': 'ရှိပြီးသား Wallet ဖြင့် ဝင်ရန်',
+    'welcomeTitle': 'National eID Wallet\nမှ ကြိုဆိုပါသည်',
+    'welcomeTitleAccent': 'National eID Wallet',
+    'letsGetStarted': 'စတင်လိုက်ရအောင်!',
     'issuedByGovernment': 'ပြည်ထောင်စုသမ္မတမြန်မာနိုင်ငံတော်အစိုးရ မှ ထုတ်ပေးသည်',
+
+    'authTabSignIn': 'ဝင်ရောက်ရန်',
+    'authTabSignUp': 'အကောင့်ဖွင့်ရန်',
+    'authSignInHeadline': 'ပြန်လည် ကြိုဆိုပါသည်',
+    'authSignInHeadlineSub': 'သင့် eID Wallet သို့ ဝင်ရောက်ပါ။',
+    'authSignUpHeadline': 'အကောင့်အသစ် ဖန်တီးပါ',
+    'authSignUpHeadlineSub': 'အချက်အလက် ဖြည့်၍ စတင်လိုက်ပါ။',
+    'authSignUpDoneTitle': 'အကောင့် ဖွင့်ပြီးပါပြီ!',
+    'authSignUpDoneBody':
+        'သင့်အကောင့်ကို ဖန်တီးပြီးပါပြီ။ ဆက်လက်အသုံးပြုရန် ဝင်ရောက်ပါ။',
+    'fieldFullName': 'အမည် အပြည့်အစုံ',
+    'fieldUidNumber': 'UID နံပါတ်',
+    'errUidNumber': 'UID နံပါတ်ကို မှန်ကန်စွာ ထည့်သွင်းပါ။',
 
     'registerMethodTitle': 'မည်သည့်နည်းဖြင့် စာရင်းသွင်းလိုပါသလဲ?',
     'registerMethodSubtitle':
@@ -266,7 +300,7 @@ class AppStrings {
     'errUid': 'မှတ်ပုံတင်အမှတ် ပုံစံ မမှန်ပါ။ ဥပမာ — 12/ABC(N)123456',
 
     'otpTitle': 'သင့်ဖုန်းနံပါတ်ကို အတည်ပြုပါ',
-    'otpTitleEmail': 'သင့်အီးမေးလ်ကို အတည်ပြုပါ',
+    'otpTitleEmail': 'သင့် အီးမေးလ် OTP ကို အတည်ပြုပါ',
     'otpSentTo': 'ကုဒ် ပေးပို့သည့်နေရာ',
     'otpHint': 'ဂဏန်း ၆ လုံးပါ ကုဒ်ကို ရိုက်ထည့်ပါ။',
     'resendCode': 'ကုဒ် ပြန်ပို့ရန်',
@@ -285,9 +319,9 @@ class AppStrings {
     'readyTitle': 'သင့် Wallet အဆင်သင့် ဖြစ်ပါပြီ!',
     'readySubtitle':
         'အခြေခံ စာရင်းသွင်းမှု ပြီးဆုံးပါပြီ။ နောက်တစ်ဆင့်အဖြစ် သင့်လုံခြုံရေး သော့ကို ဖန်တီးပါမည်။',
-    'readyStepPhone': 'ဖုန်းနံပါတ် အတည်ပြုပြီး',
+    'readyStepEmail': 'အီးမေးလ်လိပ်စာ အတည်ပြုပြီး',
     'readyStepPin': 'လုံခြုံရေး PIN သတ်မှတ်ပြီး',
-    'secureWalletCta': 'Wallet ကို လုံခြုံအောင် ပြုလုပ်ရန်',
+    'goToKeyPair': 'Key Pair သို့ သွားရန်',
     'goToWalletHome': 'Wallet Home သို့ သွားရန်',
 
     'keyIntroTitle': 'သင့် Wallet ကို လုံခြုံအောင် ပြုလုပ်ခြင်း',
@@ -319,7 +353,6 @@ class AppStrings {
     'whatYouGetHint':
         'ဤတန်ဖိုးများအတိုင်း ထုတ်ပေးသူက လက်မှတ်ရေးထိုး ထုတ်ပေးပါမည်။',
     'issuerVerified': 'အတည်ပြုပြီး ထုတ်ပေးသူ',
-    'keyRequiredFirst': 'အထောက်အထား မတောင်းခံမီ သော့ကို အရင်ဖန်တီးပါ။',
     'requestCredential': 'အထောက်အထား တောင်းခံရန်',
     'issuingTitle': 'သင့်အထောက်အထားကို ဖန်တီးနေပါသည်',
     'stepAuthorize': 'ထုတ်ပေးသူထံ ခွင့်ပြုချက် တောင်းခံခြင်း',
@@ -329,7 +362,7 @@ class AppStrings {
     'stepStore': 'Wallet အတွင်း လုံခြုံစွာ သိမ်းဆည်းခြင်း',
     'credentialIssued': 'အထောက်အထား ထုတ်ပေးပြီးပါပြီ',
 
-    'scanTitle': 'ဘဏ်နှင့် အတည်ပြုရန် စကင်ဖတ်ပါ',
+    'scanTitle': 'ဘဏ်နှင့် အတည်ပြုရန် စကန်ဖတ်ပါ',
     'scanSubtitle': 'ဘဏ်၏ ဖန်သားပြင်ပေါ်ရှိ QR ကုဒ်ကို ဘောင်အတွင်း ချိန်ပါ။',
     'havingTrouble': 'အခက်အခဲ ရှိပါသလား?',
     'cameraPlaceholder': 'ကင်မရာ ကြည့်ကွင်း',
@@ -344,6 +377,8 @@ class AppStrings {
     'chooseCredentialTitle': 'အထောက်အထား ရွေးချယ်ပါ',
     'chooseCredentialSubtitle': 'တင်ပြရန် အထောက်အထားတစ်ခုကို ရွေးပါ။',
     'issuedBy': 'ထုတ်ပေးသူ',
+    'credentialMatches': 'တောင်းဆိုထားသည့် အချက်အလက် အားလုံး ပါဝင်သည်',
+    'credentialMissing': 'တောင်းဆိုထားသည့် အချက်အလက် အချို့ မပါဝင်ပါ',
     'validUntil': '{d} အထိ သက်တမ်းရှိသည်',
 
     'confirmShareTitle': 'အတည်ပြုပြီး မျှဝေပါ',
@@ -351,6 +386,7 @@ class AppStrings {
     'consentText':
         'အထက်ပါ အချက်အလက်များကို {v} သို့ မျှဝေရန် ကျွန်ုပ် သဘောတူပါသည်။',
     'consentRequired': 'ဆက်လက် ဆောင်ရွက်ရန် သဘောတူညီချက် လိုအပ်ပါသည်။',
+    'whatYouShare': 'မျှဝေမည့် အချက်အလက်များ',
     'sentSecurely': 'အချက်အလက်များကို ကုဒ်ဝှက်ပြီး လုံခြုံစွာ ပေးပို့ပါမည်။',
 
     'readingTitle': 'အချက်အလက် ဖတ်ယူနေသည်…',
@@ -377,10 +413,14 @@ class AppStrings {
     'attrPhoto': 'ဓာတ်ပုံ',
 
     'homeGreeting': 'မင်္ဂလာပါ',
+    'homeProtected': 'ကာကွယ်ထားသည်',
+    'recentActivity': 'မကြာသေးမီက မျှဝေမှုများ',
+    'activityShared': 'အချက်အလက် {n} ခု မျှဝေခဲ့သည်',
+    'activityEmpty': 'မျှဝေမှု မှတ်တမ်း မရှိသေးပါ။',
     'myCredentials': 'ကျွန်ုပ်၏ အထောက်အထားများ',
     'quickActions': 'အမြန် လုပ်ဆောင်ချက်များ',
-    'actionScan': 'QR စကင်ဖတ်ရန်',
-    'actionAdd': 'အထောက်အထား ထည့်ရန်',
+    'actionScan': 'QR စကန်ဖတ်ရန်',
+    'actionAdd': 'အထောက်အထား ကြည့်ရန်',
     'actionSecurity': 'လုံခြုံရေး',
     'noCredentials': 'အထောက်အထား မရှိသေးပါ။',
 
@@ -397,7 +437,7 @@ class AppStrings {
   // ═══════════════════════════════════════════════════════════════════════
   static const Map<String, String> _en = {
     'appName': 'National Digital ID Wallet',
-    'appNameShort': 'EID Wallet',
+    'appNameShort': 'eID Wallet',
     'languageName': 'English',
     'continue': 'Continue',
     'back': 'Back',
@@ -414,12 +454,22 @@ class AppStrings {
     'stepOf': 'Step {a} of {b}',
 
     'welcomeTitle': 'Welcome to the National Digital ID Wallet',
-    'welcomeSubtitle':
-        'Keep your government-issued digital ID safely on your phone and present it whenever it is needed.',
-    'createWallet': 'Create New Wallet',
-    'signInExisting': 'Sign In with Existing Wallet',
+    'welcomeTitleAccent': 'Digital ID Wallet',
+    'letsGetStarted': "Let's Get Started!",
     'issuedByGovernment':
         'Issued by the Government of the Republic of the Union of Myanmar',
+
+    'authTabSignIn': 'Sign In',
+    'authTabSignUp': 'Sign Up',
+    'authSignInHeadline': 'Welcome back',
+    'authSignInHeadlineSub': 'Sign in to manage your digital ID.',
+    'authSignUpHeadline': 'Create your account',
+    'authSignUpHeadlineSub': 'Fill in your details to get started.',
+    'authSignUpDoneTitle': 'Account created',
+    'authSignUpDoneBody': 'Your account is ready. Sign in to continue.',
+    'fieldFullName': 'Full name',
+    'fieldUidNumber': 'UID Number',
+    'errUidNumber': 'Enter a valid UID number.',
 
     'registerMethodTitle': 'How would you like to register?',
     'registerMethodSubtitle':
@@ -442,7 +492,7 @@ class AppStrings {
     'errUid': 'Invalid UID format. Example: 12/ABC(N)123456',
 
     'otpTitle': 'Verify your phone number',
-    'otpTitleEmail': 'Verify your email address',
+    'otpTitleEmail': 'Verify your Email OTP',
     'otpSentTo': 'Code sent to',
     'otpHint': 'Enter the 6-digit code.',
     'resendCode': 'Resend code',
@@ -461,9 +511,9 @@ class AppStrings {
     'readyTitle': 'Your Wallet is Ready!',
     'readySubtitle':
         'Basic registration is complete. Next we will create the security key that protects your credentials.',
-    'readyStepPhone': 'Phone number verified',
+    'readyStepEmail': 'Email address verified',
     'readyStepPin': 'Secure PIN created',
-    'secureWalletCta': 'Secure your wallet',
+    'goToKeyPair': 'Go to Key Pair',
     'goToWalletHome': 'Go to Wallet Home',
 
     'keyIntroTitle': 'Securing your Wallet',
@@ -496,7 +546,6 @@ class AppStrings {
     'whatYouGetHint':
         'These are the exact values the issuer will sign into your credential.',
     'issuerVerified': 'Verified issuer',
-    'keyRequiredFirst': 'Create it first to bind your credential.',
     'requestCredential': 'Request Credential',
     'issuingTitle': 'Creating your credential',
     'stepAuthorize': 'Requesting authorization from the issuer',
@@ -522,12 +571,15 @@ class AppStrings {
     'chooseCredentialTitle': 'Choose Credential',
     'chooseCredentialSubtitle': 'Select the credential you want to present.',
     'issuedBy': 'Issued by',
+    'credentialMatches': 'Has every requested detail',
+    'credentialMissing': 'Missing some requested details',
     'validUntil': 'Valid until {d}',
 
     'confirmShareTitle': 'Confirm & Share',
     'confirmShareSubtitle': 'You are about to send the following to {v}.',
     'consentText': 'I agree to share the information above with {v}.',
     'consentRequired': 'Your consent is required to continue.',
+    'whatYouShare': 'What you will share',
     'sentSecurely': 'Data will be encrypted and sent securely.',
 
     'readingTitle': 'Reading Data…',
@@ -554,10 +606,14 @@ class AppStrings {
     'attrPhoto': 'Photo',
 
     'homeGreeting': 'Hello',
+    'homeProtected': 'Protected',
+    'recentActivity': 'Recent shares',
+    'activityShared': '{n} details shared',
+    'activityEmpty': 'Nothing shared yet.',
     'myCredentials': 'My Credentials',
     'quickActions': 'Quick actions',
     'actionScan': 'Scan QR',
-    'actionAdd': 'Add credential',
+    'actionAdd': 'View credential',
     'actionSecurity': 'Security',
     'noCredentials': 'No credentials yet.',
 

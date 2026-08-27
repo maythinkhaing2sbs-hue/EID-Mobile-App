@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -9,6 +10,41 @@ import 'core/router/routes.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/text_scale_clamp.dart';
 import 'widgets/device_frame.dart';
+
+/// Lets a mouse and a trackpad drag scrollables, not just a finger.
+///
+/// Flutter's default omits [PointerDeviceKind.mouse] from `dragDevices`, on the
+/// reasoning that desktop users scroll with a wheel. That silently breaks any
+/// horizontally-paged content — the credential deck on the home screen has no
+/// wheel axis to fall back on, so with the default behaviour it simply cannot
+/// be swiped when the app is reviewed in a browser.
+class AppScrollBehavior extends MaterialScrollBehavior {
+  const AppScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => const {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.invertedStylus,
+      };
+
+  /// No scrollbar, on any platform.
+  ///
+  /// Material adds one whenever the *host* is a desktop, which in a browser
+  /// means a grey bar runs down the inside of the phone mockup — an artefact of
+  /// where the app is being reviewed, not part of the product. Handsets never
+  /// show one, so suppressing it everywhere is what makes the review build
+  /// match the shipped one.
+  @override
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) =>
+      child;
+}
 
 /// Root widget.
 ///
@@ -49,7 +85,7 @@ class _EidWalletAppState extends State<EidWalletApp> {
         child: ValueListenableBuilder<Locale>(
           valueListenable: _locale,
           builder: (context, locale, _) => MaterialApp(
-            title: 'National EID Wallet',
+            title: 'National eID Wallet',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light(locale),
             locale: locale,
@@ -63,6 +99,7 @@ class _EidWalletAppState extends State<EidWalletApp> {
             initialRoute: Routes.welcome,
             onGenerateRoute: Routes.onGenerateRoute,
             navigatorObservers: [_routeObserver],
+            scrollBehavior: const AppScrollBehavior(),
             builder: (context, child) => AppTextScaleClamp(
               // On a desktop-sized viewport the app is presented inside a
               // phone mockup; on a handset this is a pass-through. It wraps

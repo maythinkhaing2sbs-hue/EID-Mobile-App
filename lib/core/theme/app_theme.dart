@@ -11,7 +11,7 @@ abstract final class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: AppColors.surfaceMuted,
+      scaffoldBackgroundColor: AppColors.surface,
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         onPrimary: AppColors.textOnPrimary,

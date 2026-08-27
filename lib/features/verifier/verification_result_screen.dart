@@ -57,7 +57,10 @@ class VerificationResultScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SectionLabel(credential.kind.label(s)),
+                SectionLabel(
+                  credential.kind.label(s),
+                  icon: credential.kind.icon,
+                ),
                 for (final claim in request.requestedClaims)
                   KeyValueRow(
                     label: claim.label(s),

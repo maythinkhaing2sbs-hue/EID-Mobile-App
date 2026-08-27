@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../core/l10n/app_strings.dart';
 import '../../core/router/routes.dart';
@@ -8,6 +7,8 @@ import '../../core/theme/app_dimens.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/cards.dart';
+import '../../widgets/pulse_icon.dart';
+import '../../widgets/success_check.dart';
 
 /// Registration complete — and a hand-off, not an ending.
 ///
@@ -29,7 +30,7 @@ class WalletReadyScreen extends StatelessWidget {
     return AppScaffold(
       showBack: false,
       bottomBar: PrimaryButton(
-        label: s.secureWalletCta,
+        label: s.goToKeyPair,
         icon: Icons.arrow_forward_rounded,
         onPressed: () => Navigator.of(context)
             .pushNamedAndRemoveUntil(Routes.keyCreate, (route) => false),
@@ -37,171 +38,48 @@ class WalletReadyScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.only(top: Gap.xxl, bottom: Gap.xl),
         children: [
-          const Center(child: _WalletReadyHero()),
+          // The tick the rest of the app uses for "this completed", at hero
+          // size and still beating: registration is done, and the mark says so
+          // for as long as the user is on the screen rather than for the first
+          // half second of it.
+          const Center(child: SuccessCheck(size: 112)),
           Gap.h32,
-          Text(
-            s.readyTitle,
-            style: text.headlineLarge,
-            textAlign: TextAlign.center,
-          ),
-          Gap.h12,
-          Text(
-            s.readySubtitle,
-            style: text.bodyMedium,
-            textAlign: TextAlign.center,
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 260),
+            child: Column(
+              children: [
+                Text(
+                  s.readyTitle,
+                  style: text.headlineLarge,
+                  textAlign: TextAlign.center,
+                ),
+                Gap.h12,
+                Text(
+                  s.readySubtitle,
+                  style: text.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
           Gap.h32,
 
           // A checklist rather than a paragraph: the two things registration
           // just put behind the user, named so the progress is concrete.
-          AppCard(
-            padding: Insets.cardLoose,
-            child: Column(
-              children: [
-                _DoneRow(label: s.readyStepPhone),
-                const Divider(height: Gap.xl),
-                _DoneRow(label: s.readyStepPin),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The milestone mark for this screen: the wallet itself, sealed.
-///
-/// A bare green tick is the same mark this app uses for a validated field, so
-/// it reads as "that worked" rather than "you now have a wallet". Giving the
-/// object its own gradient badge — brand blue, the colour reserved for the
-/// credential card — and hanging the tick off it as a seal makes the moment
-/// look like something was *issued to the user*, not merely accepted.
-class _WalletReadyHero extends StatefulWidget {
-  const _WalletReadyHero();
-
-  @override
-  State<_WalletReadyHero> createState() => _WalletReadyHeroState();
-}
-
-class _WalletReadyHeroState extends State<_WalletReadyHero>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 820),
-  )..forward();
-
-  /// Three beats: the rings breathe out, the wallet lands, the seal snaps on.
-  /// Staging them is what separates a milestone from a static illustration.
-  late final Animation<double> _rings = CurvedAnimation(
-    parent: _c,
-    curve: const Interval(0, 0.7, curve: Curves.easeOutCubic),
-  );
-
-  late final Animation<double> _badge = CurvedAnimation(
-    parent: _c,
-    curve: const Interval(0, 0.6, curve: Curves.easeOutBack),
-  );
-
-  late final Animation<double> _seal = CurvedAnimation(
-    parent: _c,
-    curve: const Interval(0.5, 1, curve: Curves.easeOutBack),
-  );
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => HapticFeedback.mediumImpact(),
-    );
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 164,
-      width: 164,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          ScaleTransition(
-            scale: _rings,
-            child: const _Ring(size: 164, opacity: 0.06),
-          ),
-          ScaleTransition(
-            scale: _rings,
-            child: const _Ring(size: 130, opacity: 0.10),
-          ),
-          ScaleTransition(
-            scale: _badge,
-            child: Container(
-              height: 96,
-              width: 96,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.primary, AppColors.primaryDark],
-                ),
-                boxShadow: AppColors.raisedShadow,
-              ),
-              child: const Icon(
-                Icons.account_balance_wallet_rounded,
-                size: 46,
-                color: AppColors.textOnPrimary,
-              ),
-            ),
-          ),
-          Positioned(
-            right: 17,
-            bottom: 17,
-            child: ScaleTransition(
-              scale: _seal,
-              child: Container(
-                height: 36,
-                width: 36,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.success,
-                  // The white collar is what lifts the seal off the badge
-                  // instead of letting green and blue smear together.
-                  border: Border.all(color: AppColors.surface, width: 3),
-                ),
-                child: const Icon(
-                  Icons.check_rounded,
-                  size: 19,
-                  color: AppColors.textOnPrimary,
-                ),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 380),
+            child: AppCard(
+              padding: Insets.cardLoose,
+              child: Column(
+                children: [
+                  _DoneRow(label: s.readyStepEmail),
+                  const Divider(height: Gap.xl),
+                  _DoneRow(label: s.readyStepPin),
+                ],
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _Ring extends StatelessWidget {
-  const _Ring({required this.size, required this.opacity});
-
-  final double size;
-  final double opacity;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: size,
-      width: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.primary.withValues(alpha: opacity),
       ),
     );
   }

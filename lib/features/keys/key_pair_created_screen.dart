@@ -37,12 +37,9 @@ class _KeyPairCreatedScreenState extends State<KeyPairCreatedScreen> {
       title: s.security,
       showBack: false,
       bottomBar: PrimaryButton(
-        label: s.goToWalletHome,
-        // Resets to home rather than popping: this is now the last step of
-        // onboarding, and the registration stack behind it must not be
-        // walkable. Reaching here from Home → Security simply returns there.
-        onPressed: () => Navigator.of(context)
-            .pushNamedAndRemoveUntil(Routes.home, (route) => false),
+        label: s.getYourIdTitle,
+        icon: Icons.badge_rounded,
+        onPressed: () => _continueToIssuance(context),
       ),
       child: ListView(
         padding: const EdgeInsets.only(top: Gap.xl, bottom: Gap.xl),
@@ -106,9 +103,28 @@ class _KeyPairCreatedScreenState extends State<KeyPairCreatedScreen> {
     );
   }
 
+  /// The key exists to bind a credential to this device, and the holder does
+  /// not have one yet — so the button goes on to the issuance flow rather than
+  /// dropping them on an empty Home to find it themselves.
+  ///
+  /// The registration stack behind this screen is torn down first: it must not
+  /// be walkable. Home is rebuilt underneath so the issuance screen's back
+  /// arrow has somewhere to go, and so leaving the flow lands where it should.
+  void _continueToIssuance(BuildContext context) {
+    Navigator.of(context)
+      ..pushNamedAndRemoveUntil(Routes.home, (route) => false)
+      ..pushNamed(Routes.credentialRequest);
+  }
+
+  /// `2026-08-27  09:11 AM`. The clock is 12-hour with the meridiem spelled
+  /// out: this string is read back to a support desk, and `09:11` alone is
+  /// ambiguous to anyone who does not think in 24-hour time.
   static String _formatDateTime(DateTime d) {
     String two(int v) => v.toString().padLeft(2, '0');
-    return '${d.year}-${two(d.month)}-${two(d.day)}  ${two(d.hour)}:${two(d.minute)}';
+    final hour = d.hour % 12 == 0 ? 12 : d.hour % 12;
+    final meridiem = d.hour < 12 ? 'AM' : 'PM';
+    return '${d.year}-${two(d.month)}-${two(d.day)}  '
+        '${two(hour)}:${two(d.minute)} $meridiem';
   }
 }
 

@@ -6,8 +6,10 @@ import '../../core/router/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/icon_motion.dart';
 
 import '../../widgets/pin_pad.dart';
+import '../../widgets/pulse_icon.dart';
 
 /// Step 3 — set and confirm the wallet PIN.
 ///
@@ -96,8 +98,11 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
     };
 
     return AppScaffold(
-      step: 3,
-      totalSteps: 3,
+      // Entering a PIN and confirming it are two steps, not one: they are two
+      // pieces of work for the user, and sharing a segment left the bar
+      // frozen through the longest stretch of the flow.
+      step: _confirming ? 4 : 3,
+      totalSteps: 4,
       onBack: _back,
       child: Column(
         children: [
@@ -139,8 +144,10 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
                       Gap.h32,
                       ShakeOnError(
                         trigger: _pin.errorTrigger,
-                        child:
-                            PinDots(filled: _pin.filled, error: _pin.hasError),
+                        child: PinDots(
+                          filled: _pin.filled,
+                          error: _pin.hasError,
+                        ),
                       ),
 
                       // Fixed-height slot so the keypad never shifts when an
@@ -154,9 +161,7 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
                             child: Text(
                               errorText ?? '',
                               textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium
+                              style: Theme.of(context).textTheme.labelMedium
                                   ?.copyWith(color: AppColors.danger),
                             ),
                           ),
@@ -178,8 +183,11 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.visibility_off_outlined,
-                  size: 15, color: AppColors.textTertiary),
+              const Icon(
+                Icons.visibility_off_outlined,
+                size: 15,
+                color: AppColors.textTertiary,
+              ),
               Gap.w8,
               Flexible(
                 child: Text(
@@ -203,21 +211,29 @@ class _StageBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 260),
-      height: 68,
-      width: 68,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: confirming ? AppColors.primary : AppColors.secondary,
-      ),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 220),
-        child: Icon(
-          confirming ? Icons.lock_rounded : Icons.lock_open_rounded,
-          key: ValueKey(confirming),
-          size: 30,
-          color: confirming ? AppColors.surface : AppColors.primary,
+    // Two separate motions: a one-shot pop when the screen arrives, and the
+    // colour-and-glyph cross-fade each time the stage advances. Folding them
+    // into one controller would re-pop the badge on every stage change.
+    return ScaleIn(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 260),
+        height: 68,
+        width: 68,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: confirming ? AppColors.primary : AppColors.secondary,
+        ),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 220),
+          // The glyph keeps turning like a key in a cylinder — the action the
+          // keypad below is standing in for.
+          child: MotionGlyph(
+            key: ValueKey(confirming),
+            icon: confirming ? Icons.lock_rounded : Icons.lock_open_rounded,
+            size: 30,
+            color: confirming ? AppColors.surface : AppColors.primary,
+            motion: IconMotion.turn,
+          ),
         ),
       ),
     );

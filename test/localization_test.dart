@@ -50,6 +50,7 @@ void main() {
             'otpSubtitle',
             'resendIn',
             'validUntil',
+            'activityShared',
             'confirmShareSubtitle',
             'consentText',
           };
@@ -76,20 +77,20 @@ void main() {
       await setPhoneSurface(tester);
       await tester.pumpWidget(wrapScreen(const WelcomeScreen()));
 
-      expect(find.text(my.welcomeTitle), findsOneWidget);
-      expect(find.text(en.welcomeTitle), findsNothing);
+      expect(find.text(my.welcomeTitle, findRichText: true), findsOneWidget);
+      expect(find.text(en.welcomeTitle, findRichText: true), findsNothing);
 
       await tester.tap(find.text('English'));
       await tester.pumpAndSettle();
 
-      expect(find.text(en.welcomeTitle), findsOneWidget);
-      expect(find.text(en.createWallet), findsOneWidget);
-      expect(find.text(my.welcomeTitle), findsNothing);
+      expect(find.text(en.welcomeTitle, findRichText: true), findsOneWidget);
+      expect(find.text(en.letsGetStarted), findsOneWidget);
+      expect(find.text(my.welcomeTitle, findRichText: true), findsNothing);
 
       await tester.tap(find.text('မြန်မာ'));
       await tester.pumpAndSettle();
 
-      expect(find.text(my.welcomeTitle), findsOneWidget);
+      expect(find.text(my.welcomeTitle, findRichText: true), findsOneWidget);
     });
   });
 }
@@ -112,10 +113,20 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.needHelp,
   (s) => s.security,
   (s) => s.welcomeTitle,
-  (s) => s.welcomeSubtitle,
-  (s) => s.createWallet,
-  (s) => s.signInExisting,
+  (s) => s.welcomeTitleAccent,
+  (s) => s.letsGetStarted,
   (s) => s.issuedByGovernment,
+  (s) => s.authTabSignIn,
+  (s) => s.authTabSignUp,
+  (s) => s.authSignInHeadline,
+  (s) => s.authSignInHeadlineSub,
+  (s) => s.authSignUpHeadline,
+  (s) => s.authSignUpHeadlineSub,
+  (s) => s.authSignUpDoneTitle,
+  (s) => s.authSignUpDoneBody,
+  (s) => s.fieldFullName,
+  (s) => s.fieldUidNumber,
+  (s) => s.errUidNumber,
   (s) => s.registerMethodTitle,
   (s) => s.registerMethodSubtitle,
   (s) => s.methodPhone,
@@ -149,9 +160,9 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.pinNeverShare,
   (s) => s.readyTitle,
   (s) => s.readySubtitle,
-  (s) => s.readyStepPhone,
+  (s) => s.readyStepEmail,
   (s) => s.readyStepPin,
-  (s) => s.secureWalletCta,
+  (s) => s.goToKeyPair,
   (s) => s.goToWalletHome,
   (s) => s.keyIntroTitle,
   (s) => s.keyIntroBody,
@@ -178,7 +189,6 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.whatYouGet,
   (s) => s.whatYouGetHint,
   (s) => s.issuerVerified,
-  (s) => s.keyRequiredFirst,
   (s) => s.requestCredential,
   (s) => s.issuingTitle,
   (s) => s.stepAuthorize,
@@ -200,8 +210,11 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.chooseCredentialTitle,
   (s) => s.chooseCredentialSubtitle,
   (s) => s.issuedBy,
+  (s) => s.credentialMatches,
+  (s) => s.credentialMissing,
   (s) => s.confirmShareTitle,
   (s) => s.consentRequired,
+  (s) => s.whatYouShare,
   (s) => s.sentSecurely,
   (s) => s.readingTitle,
   (s) => s.readingSubtitle,
@@ -224,6 +237,9 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.attrAddress,
   (s) => s.attrPhoto,
   (s) => s.homeGreeting,
+  (s) => s.homeProtected,
+  (s) => s.recentActivity,
+  (s) => s.activityEmpty,
   (s) => s.myCredentials,
   (s) => s.quickActions,
   (s) => s.actionScan,

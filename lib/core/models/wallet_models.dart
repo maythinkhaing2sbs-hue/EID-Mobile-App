@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../l10n/app_strings.dart';
 
 /// The claims a credential can carry. Using an enum rather than free strings
@@ -21,6 +23,21 @@ enum ClaimId {
         ClaimId.address => s.attrAddress,
         ClaimId.photo => s.attrPhoto,
       };
+
+  /// Whether the value belongs in the tabular-figure face.
+  ///
+  /// Codes, numbers and ISO dates line up in a column that way; names and free
+  /// text stay in the body face. It lives on the claim itself so every screen
+  /// that prints a value renders it identically — the issuance preview and the
+  /// verifier consent screens have to agree, or the same record reads as two.
+  bool get isTabular => switch (this) {
+        ClaimId.dateOfBirth ||
+        ClaimId.nationality ||
+        ClaimId.documentNumber ||
+        ClaimId.expiryDate =>
+          true,
+        ClaimId.fullName || ClaimId.address || ClaimId.photo => false,
+      };
 }
 
 enum CredentialKind {
@@ -32,6 +49,18 @@ enum CredentialKind {
         CredentialKind.nationalId => s.credNationalId,
         CredentialKind.passport => s.credPassport,
         CredentialKind.driverLicense => s.credDriverLicense,
+      };
+
+  /// The glyph that stands for this document across the app.
+  ///
+  /// One definition, because the same passport is drawn on the wallet home, the
+  /// selection list, the consent screen and the verifier's receipt - and a
+  /// document that changes its icon between screens reads as a different
+  /// document.
+  IconData get icon => switch (this) {
+        CredentialKind.nationalId => Icons.badge_rounded,
+        CredentialKind.passport => Icons.menu_book_rounded,
+        CredentialKind.driverLicense => Icons.directions_car_rounded,
       };
 }
 
@@ -86,6 +115,11 @@ class WalletCredential {
       ClaimId.nationality: 'MMR',
       ClaimId.documentNumber: '12/ABC(N)123456',
       ClaimId.expiryDate: '2030-12-31',
+      // Held on the credential but not asked for by the bank KYC request. It
+      // is the holder's record, so the wallet's own detail sheet shows it even
+      // when no verifier has asked - and its absence from the consent list is
+      // then a visible fact rather than an omission.
+      ClaimId.address: 'No. 12, Bogyoke Aung San Rd, Yangon',
     },
   );
 
@@ -101,6 +135,7 @@ class WalletCredential {
       ClaimId.nationality: 'MMR',
       ClaimId.documentNumber: 'MB1234567',
       ClaimId.expiryDate: '2029-06-30',
+      ClaimId.address: 'No. 12, Bogyoke Aung San Rd, Yangon',
     },
   );
 }
@@ -137,6 +172,50 @@ class PresentationRequest {
       ClaimId.expiryDate,
     ],
   );
+}
+
+/// One completed presentation: who received data, from which credential, and
+/// how much of it.
+///
+/// A wallet that holds a citizen's identity owes them a record of where it has
+/// been sent. This is the holder's side of the audit trail the verifier keeps.
+class ActivityEntry {
+  const ActivityEntry({
+    required this.verifierName,
+    required this.kind,
+    required this.claimCount,
+    required this.at,
+  });
+
+  final String verifierName;
+  final CredentialKind kind;
+  final int claimCount;
+  final DateTime at;
+
+  /// `2026-08-24`. Absolute rather than "2 days ago": relative time needs
+  /// plural rules in both languages, and a date is what a citizen would quote
+  /// when querying a share they did not recognise.
+  String get date =>
+      '${at.year.toString().padLeft(4, '0')}-'
+      '${at.month.toString().padLeft(2, '0')}-'
+      '${at.day.toString().padLeft(2, '0')}';
+
+  /// Fixed dates, not `DateTime.now()` offsets — seeded demo rows that move
+  /// every run make the screenshot previews churn for no reason.
+  static final List<ActivityEntry> samples = [
+    ActivityEntry(
+      verifierName: 'ABC Bank',
+      kind: CredentialKind.nationalId,
+      claimCount: 5,
+      at: DateTime(2026, 8, 24),
+    ),
+    ActivityEntry(
+      verifierName: 'Yangon General Hospital',
+      kind: CredentialKind.nationalId,
+      claimCount: 3,
+      at: DateTime(2026, 8, 19),
+    ),
+  ];
 }
 
 /// The device-bound P-256 key pair created in step 7 and confirmed in step 8.

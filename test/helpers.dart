@@ -11,11 +11,16 @@ import 'package:flutter_test/flutter_test.dart';
 /// Wraps a single screen in the same scopes, theme and localisation delegates
 /// the real app provides, so widget tests exercise the production widget tree
 /// rather than a stripped-down one.
+///
+/// Pass [onGenerateRoute] to stub navigation. Worth doing when the screen
+/// under test pushes one that runs a timer — landing on it would leave the
+/// timer pending and fail the test on something it is not about.
 Widget wrapScreen(
   Widget child, {
   WalletState? wallet,
   Locale locale = const Locale('my'),
   LocaleController? localeController,
+  RouteFactory? onGenerateRoute,
 }) {
   final controller = localeController ?? LocaleController(locale);
 
@@ -36,7 +41,7 @@ Widget wrapScreen(
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          onGenerateRoute: Routes.onGenerateRoute,
+          onGenerateRoute: onGenerateRoute ?? Routes.onGenerateRoute,
           // Mirrors the production builder. Without it, tests would run under
           // an unclamped MediaQuery and would not catch text-scaler bugs that
           // only appear once the app-wide clamp is in place.
