@@ -53,6 +53,7 @@ void main() {
             'activityShared',
             'confirmShareSubtitle',
             'consentText',
+            'verifyWith',
           };
           if (templated.contains(entry.key)) continue;
           expect(entry.value.contains('{'), isFalse,
@@ -189,6 +190,8 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.copy,
   (s) => s.getYourIdTitle,
   (s) => s.getYourIdSubtitle,
+  (s) => s.yourIdTitle,
+  (s) => s.yourIdSubtitle,
   (s) => s.credential,
   (s) => s.issuer,
   (s) => s.whatYouGet,
@@ -218,7 +221,7 @@ final List<String Function(AppStrings)> _allGetters = [
   (s) => s.havingTrouble,
   (s) => s.cameraPlaceholder,
   (s) => s.simulateScan,
-  (s) => s.reviewTitle,
+  (s) => s.verifyWith('ABC Bank'),
   (s) => s.requestFrom,
   (s) => s.theyRequest,
   (s) => s.viewDetails,

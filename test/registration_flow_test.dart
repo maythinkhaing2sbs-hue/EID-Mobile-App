@@ -398,7 +398,7 @@ void main() {
       await settle(tester);
 
       expect(find.text(my.keyCreatedTitle), findsOneWidget);
-      expect(find.text(my.getYourIdTitle), findsOneWidget);
+      expect(find.text(my.getCredentialRequest), findsOneWidget);
 
       await tester.tap(find.byType(SuccessCheck));
       await settle(tester);
@@ -410,7 +410,7 @@ void main() {
       expect(find.text(my.keyFailedReason), findsOneWidget);
       expect(find.text(my.keyCreated), findsNothing);
       expect(find.text(my.tryAgain), findsOneWidget);
-      expect(find.text(my.getYourIdTitle), findsNothing);
+      expect(find.text(my.getCredentialRequest), findsNothing);
 
       await tester.tap(find.byType(FailureCross));
       await settle(tester);

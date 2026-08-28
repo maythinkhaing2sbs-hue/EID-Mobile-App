@@ -20,10 +20,12 @@ import '../../widgets/verifier_logo.dart';
 /// carries its own logo and the trust badge, and shows the domain the response
 /// will actually be posted to.
 ///
-/// The claims are printed with the values that would be sent, exactly as the
-/// issuance screen prints them. A checklist of field names tells the holder
-/// which boxes the verifier ticked; it does not tell them what is about to
-/// leave the device.
+/// The claims are named, not printed with their values. This is the first of
+/// the three gates and nothing has been agreed yet — putting the holder's date
+/// of birth and document number on screen to describe a request that may be
+/// declined shows the record to anyone glancing at the handset for no decision
+/// it helps make. The values appear at the last gate, on the confirm-and-share
+/// screen, where they are what is actually being sent.
 class ReviewRequestScreen extends StatelessWidget {
   const ReviewRequestScreen({super.key, required this.request});
 
@@ -48,7 +50,7 @@ class ReviewRequestScreen extends StatelessWidget {
     final preview = _previewSource(WalletScope.of(context).credentials);
 
     return AppScaffold(
-      title: s.reviewTitle,
+      title: s.verifyWith(request.verifierName),
       bottomBar: ActionPair(
         secondary: DeclineButton(
           label: s.decline,
@@ -93,16 +95,9 @@ class ReviewRequestScreen extends StatelessWidget {
                     ],
                   ),
                   Gap.h4,
-                  for (final (i, claim) in request.requestedClaims.indexed)
-                    ClaimValueRow(
-                      label: claim.label(s),
-                      value: preview.claims[claim] ?? '-',
-                      tabular: claim.isTabular,
-                      first: i == 0,
-                    ),
-                ] else
-                  for (final claim in request.requestedClaims)
-                    ClaimRow(label: claim.label(s)),
+                ],
+                for (final claim in request.requestedClaims)
+                  ClaimRow(label: claim.label(s)),
                 Gap.h8,
                 Align(
                   alignment: AlignmentDirectional.centerStart,
@@ -123,10 +118,10 @@ class ReviewRequestScreen extends StatelessWidget {
     );
   }
 
-  /// The record as the sheet prints it, in ID-card order. Address is on the
-  /// list although no verifier on this screen asks for it: the sheet answers
-  /// "what does this document say about me?", not "what is being sent?" - that
-  /// question is already answered by the card behind it.
+  /// The fields the sheet lists, in ID-card order. Address is on the list
+  /// although no verifier on this screen asks for it: the sheet answers "what
+  /// does this document carry?", not "what is being sent?" - that question is
+  /// already answered by the card behind it.
   static const List<ClaimId> _detailClaims = [
     ClaimId.fullName,
     ClaimId.myanmarName,
@@ -174,13 +169,14 @@ class ReviewRequestScreen extends StatelessWidget {
                 KeyValueRow(label: s.requestFrom, value: request.verifierName),
                 const Divider(height: Gap.lg),
                 if (preview case final credential?) ...[
+                  // Field names only. The values behind them are the holder's
+                  // record, and this sheet is read before any decision to share
+                  // has been made — printing them here would put the whole
+                  // document on screen to answer a question about which fields
+                  // it holds.
                   for (final claim in _detailClaims)
-                    if (credential.claims[claim] case final value?) ...[
-                      KeyValueRow(
-                        label: claim.label(s),
-                        value: value,
-                        numericValue: claim.isTabular,
-                      ),
+                    if (credential.claims.containsKey(claim)) ...[
+                      ClaimRow(label: claim.label(s), checked: false),
                       const Divider(height: Gap.lg),
                     ],
                   KeyValueRow(

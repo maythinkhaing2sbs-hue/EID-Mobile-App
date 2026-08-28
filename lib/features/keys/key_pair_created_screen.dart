@@ -60,7 +60,7 @@ class _KeyPairCreatedScreenState extends State<KeyPairCreatedScreen> {
                   Navigator.of(context).pushReplacementNamed(Routes.keyCreate),
             )
           : PrimaryButton(
-              label: s.getYourIdTitle,
+              label: s.getCredentialRequest,
               icon: Icons.badge_rounded,
               onPressed: () => _continueToIssuance(context),
             ),

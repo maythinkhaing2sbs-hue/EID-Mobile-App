@@ -3,25 +3,21 @@ import 'package:flutter/material.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/models/wallet_models.dart';
 import '../../core/models/wallet_state.dart';
-import '../../core/router/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/brand_panel.dart';
-import '../../widgets/buttons.dart';
 import '../../widgets/cards.dart';
 
-/// Screen 9 - request the credential (OpenID4VCI).
+/// Screen 9 - the credential, in full (OpenID4VCI).
 ///
-/// The screen answers three questions before the user commits: what credential,
-/// from which issuer, and exactly which claims - with their values - it will
-/// contain. Showing the values rather than a checklist of field names is the
-/// point: consent to "Date of Birth" is not informed consent; consent to
-/// "Date of Birth - 1990-05-15" is, and this is the last moment the holder can
-/// spot a wrong record before the issuer signs it.
+/// The screen answers three questions: what credential, from which issuer, and
+/// exactly which claims - with their values - it carries. Showing the values
+/// rather than a checklist of field names is the point: "Date of Birth" tells
+/// the holder nothing they can check, while "Date of Birth - 1990-05-15" lets
+/// them spot a wrong record in the document that bears their name.
 ///
-/// If the holder key does not exist yet, the primary action routes to key
-/// creation first rather than failing later inside the issuance round-trip.
+/// Read-only. Nothing on this screen starts an issuance round-trip.
 class RequestCredentialScreen extends StatelessWidget {
   const RequestCredentialScreen({super.key});
 
@@ -44,20 +40,12 @@ class RequestCredentialScreen extends StatelessWidget {
 
     return AppScaffold(
       title: s.credential,
-      bottomBar: PrimaryButton(
-        label: wallet.hasHolderKey ? s.requestCredential : s.createKeyPair,
-        icon:
-            wallet.hasHolderKey ? Icons.download_rounded : Icons.vpn_key_rounded,
-        onPressed: () => Navigator.of(context).pushNamed(
-          wallet.hasHolderKey ? Routes.credentialIssuing : Routes.keyCreate,
-        ),
-      ),
       child: ListView(
         padding: const EdgeInsets.only(top: Gap.sm, bottom: Gap.xl),
         children: [
           ScreenHeader(
-            title: s.getYourIdTitle,
-            subtitle: s.getYourIdSubtitle,
+            title: s.yourIdTitle,
+            subtitle: s.yourIdSubtitle,
           ),
           Gap.h24,
 
@@ -103,9 +91,8 @@ class RequestCredentialScreen extends StatelessWidget {
 
           // Only shown once the key exists, as a confirmation. A card that
           // announces a missing key would be raising an alarm the user cannot
-          // act on from here - the primary button already changes to
-          // "Create Holder Key Pair" and takes them to the one screen that
-          // fixes it.
+          // act on from here - this screen only reports what the wallet holds,
+          // and the key is created in the wallet setup flow.
           if (wallet.holderKey case final key?) ...[
             Gap.h16,
             _HolderKeyCard(holderKey: key),

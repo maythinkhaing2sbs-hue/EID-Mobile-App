@@ -151,6 +151,12 @@ class AppStrings {
   // ── 8. Request credential ───────────────────────────────────────────────
   String get getYourIdTitle => _s('getYourIdTitle');
   String get getYourIdSubtitle => _s('getYourIdSubtitle');
+  String get yourIdTitle => _s('yourIdTitle');
+  String get yourIdSubtitle => _s('yourIdSubtitle');
+
+  /// The action that opens the issuance flow, worded as the request it starts
+  /// rather than as the document it ends in — the document is days away.
+  String get getCredentialRequest => _s('getCredentialRequest');
   String get credential => _s('credential');
   String get issuer => _s('issuer');
   String get whatYouGet => _s('whatYouGet');
@@ -191,7 +197,12 @@ class AppStrings {
   String get simulateScan => _s('simulateScan');
 
   // ── 10. Review request ──────────────────────────────────────────────────
-  String get reviewTitle => _s('reviewTitle');
+  /// "Verify with ABC Bank". The verifier is named in the title bar rather than
+  /// left as a generic "Verify Credential Request": who is asking is the fact
+  /// the whole screen turns on, and it should be legible before the user has
+  /// read a single row.
+  String verifyWith(String verifier) =>
+      _s('verifyWith').replaceFirst('{v}', verifier);
   String get requestFrom => _s('requestFrom');
   String get theyRequest => _s('theyRequest');
   String get viewDetails => _s('viewDetails');
@@ -381,12 +392,15 @@ class AppStrings {
     'copy': 'ကူးယူရန်',
 
     'getYourIdTitle': 'သင့် ဒစ်ဂျစ်တယ် မှတ်ပုံတင် ရယူပါ',
+    'getCredentialRequest': 'သင့် အထောက်အထား တောင်းခံရန်',
     'getYourIdSubtitle': 'အောက်ပါ အထောက်အထားကို ထုတ်ပေးသူထံမှ တောင်းခံပါမည်။',
+    'yourIdTitle': 'သင့် ဒစ်ဂျစ်တယ် မှတ်ပုံတင်',
+    'yourIdSubtitle': 'ထုတ်ပေးသူထံမှ ရရှိထားသည့် အထောက်အထား အပြည့်အစုံ။',
     'credential': 'အထောက်အထား',
     'issuer': 'ထုတ်ပေးသူ',
-    'whatYouGet': 'ပါဝင်မည့် အချက်အလက်များ',
+    'whatYouGet': 'ပါဝင်သော အချက်အလက်များ',
     'whatYouGetHint':
-        'ဤတန်ဖိုးများအတိုင်း ထုတ်ပေးသူက လက်မှတ်ရေးထိုး ထုတ်ပေးပါမည်။',
+        'ဤအချက်အလက်များအတိုင်း ထုတ်ပေးသူက လက်မှတ်ရေးထိုး ထုတ်ပေးထားပါသည်။',
     'issuerVerified': 'အတည်ပြုပြီး ထုတ်ပေးသူ',
     'requestCredential': 'အထောက်အထား တောင်းခံရန်',
     'issuingTitle': 'သင့်အထောက်အထားကို တောင်းခံနေပါသည်',
@@ -419,7 +433,7 @@ class AppStrings {
     'cameraPlaceholder': 'ကင်မရာ ကြည့်ကွင်း',
     'simulateScan': 'QR ကုဒ် ဖတ်ပြီးကြောင်း စမ်းသပ်ရန်',
 
-    'reviewTitle': 'တောင်းဆိုမှုကို စစ်ဆေးပါ',
+    'verifyWith': '{v} နှင့် အတည်ပြုရန်',
     'requestFrom': 'တောင်းဆိုသူ',
     'theyRequest': 'အောက်ပါ အချက်အလက်များကို တောင်းဆိုနေပါသည်',
     'viewDetails': 'အသေးစိတ် ကြည့်ရန်',
@@ -602,12 +616,15 @@ class AppStrings {
     'copy': 'Copy',
 
     'getYourIdTitle': 'Get your Digital ID',
+    'getCredentialRequest': 'Get Your Credential Request',
     'getYourIdSubtitle': 'Request the following credential from the issuer.',
+    'yourIdTitle': 'Your Digital ID',
+    'yourIdSubtitle': 'The credential issued to you, and the data it carries.',
     'credential': 'Credential',
     'issuer': 'Issuer',
-    'whatYouGet': 'What you will get',
+    'whatYouGet': 'What it contains',
     'whatYouGetHint':
-        'These are the exact values the issuer will sign into your credential.',
+        'These are the exact values the issuer signed into your credential.',
     'issuerVerified': 'Verified issuer',
     'requestCredential': 'Request Credential',
     'issuingTitle': 'Requesting your credential',
@@ -641,7 +658,7 @@ class AppStrings {
     'cameraPlaceholder': 'Camera viewfinder',
     'simulateScan': 'Simulate a successful scan',
 
-    'reviewTitle': 'Verify Credential Request',
+    'verifyWith': 'Verify with {v}',
     'requestFrom': 'Request from',
     'theyRequest': 'They are requesting the following information',
     'viewDetails': 'View details',
