@@ -100,6 +100,31 @@ void main() {
       expect(find.text(my.errRequired), findsNWidgets(2));
     });
 
+    testWidgets('signing in goes straight to the holder key', (tester) async {
+      await setPhoneSurface(tester);
+      String? pushed;
+      await tester.pumpWidget(wrapScreen(
+        const AuthScreen(),
+        onGenerateRoute: (settings) {
+          pushed ??= settings.name;
+          return MaterialPageRoute<dynamic>(builder: (_) => const SizedBox());
+        },
+      ));
+
+      await tester.enterText(find.widgetWithText(TextFormField, my.fieldEmail),
+          'aung.ko@example.com');
+      await tester.enterText(
+          find.widgetWithText(TextFormField, my.fieldUidNumber), 'UID12345678');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(FilledButton, my.authTabSignIn));
+      await tester.pumpAndSettle();
+
+      // The account already exists; what this device still needs is the key
+      // pair, so the code challenge and the PIN are not on the path.
+      expect(pushed, '/key/create');
+    });
+
     testWidgets('a completed sign-up is written to the draft', (tester) async {
       await setPhoneSurface(tester);
       final wallet = WalletState();

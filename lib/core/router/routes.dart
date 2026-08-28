@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/auth/auth_screen.dart';
+import '../../features/credential/credential_detail_screen.dart';
 import '../../features/credential/credential_issued_screen.dart';
 import '../../features/credential/credential_issuing_screen.dart';
 import '../../features/credential/credential_pending_screen.dart';
@@ -59,6 +60,11 @@ abstract final class Routes {
   /// it shows whatever National ID the wallet holds.
   static const credentialIssued = '/credential/issued';
 
+  /// The held credential as a reference view — Wallet Home's "View credential"
+  /// action, not part of the issuance flow. Takes an optional
+  /// [WalletCredential]; without one it shows the National ID in the wallet.
+  static const credentialDetail = '/credential/detail';
+
   // Presentation (OpenID4VP)
   static const presentScan = '/present/scan';
   static const presentReview = '/present/review';
@@ -113,6 +119,11 @@ abstract final class Routes {
 
       case credentialIssued:
         return page(CredentialIssuedScreen(
+          credential: _arg<WalletCredential>(settings),
+        ));
+
+      case credentialDetail:
+        return page(CredentialDetailScreen(
           credential: _arg<WalletCredential>(settings),
         ));
 

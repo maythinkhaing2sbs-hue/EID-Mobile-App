@@ -151,15 +151,24 @@ class AppStrings {
   // ── 8. Request credential ───────────────────────────────────────────────
   String get getYourIdTitle => _s('getYourIdTitle');
   String get getYourIdSubtitle => _s('getYourIdSubtitle');
-  String get yourIdTitle => _s('yourIdTitle');
-  String get yourIdSubtitle => _s('yourIdSubtitle');
 
   /// The action that opens the issuance flow, worded as the request it starts
   /// rather than as the document it ends in — the document is days away.
   String get getCredentialRequest => _s('getCredentialRequest');
+
+  /// Heads the same page once the credential exists. "Get your Digital ID" is
+  /// an instruction to apply; a holder who already has one is reading a record,
+  /// not being asked to do anything.
+  String get yourDigitalIdTitle => _s('yourDigitalIdTitle');
+  String get yourDigitalIdSubtitle => _s('yourDigitalIdSubtitle');
   String get credential => _s('credential');
   String get issuer => _s('issuer');
   String get whatYouGet => _s('whatYouGet');
+
+  /// The same section on the held-credential view. "What you will get" is a
+  /// promise about an application; a document already in the wallet contains
+  /// its fields rather than being about to.
+  String get credentialContains => _s('credentialContains');
   String get whatYouGetHint => _s('whatYouGetHint');
   String get issuerVerified => _s('issuerVerified');
   String get requestCredential => _s('requestCredential');
@@ -393,14 +402,16 @@ class AppStrings {
 
     'getYourIdTitle': 'သင့် ဒစ်ဂျစ်တယ် မှတ်ပုံတင် ရယူပါ',
     'getCredentialRequest': 'သင့် အထောက်အထား တောင်းခံရန်',
+    'yourDigitalIdTitle': 'သင့် ဒစ်ဂျစ်တယ် မှတ်ပုံတင်',
+    'yourDigitalIdSubtitle':
+        'သင့် Wallet အတွင်း လက်ရှိ သိမ်းဆည်းထားသော အထောက်အထား ဖြစ်ပါသည်။',
     'getYourIdSubtitle': 'အောက်ပါ အထောက်အထားကို ထုတ်ပေးသူထံမှ တောင်းခံပါမည်။',
-    'yourIdTitle': 'သင့် ဒစ်ဂျစ်တယ် မှတ်ပုံတင်',
-    'yourIdSubtitle': 'ထုတ်ပေးသူထံမှ ရရှိထားသည့် အထောက်အထား အပြည့်အစုံ။',
     'credential': 'အထောက်အထား',
     'issuer': 'ထုတ်ပေးသူ',
-    'whatYouGet': 'ပါဝင်သော အချက်အလက်များ',
+    'whatYouGet': 'ပါဝင်မည့် အချက်အလက်များ',
+    'credentialContains': 'ပါဝင်သည့် အချက်အလက်များ',
     'whatYouGetHint':
-        'ဤအချက်အလက်များအတိုင်း ထုတ်ပေးသူက လက်မှတ်ရေးထိုး ထုတ်ပေးထားပါသည်။',
+        'ဤအချက်အလက်များကို ထုတ်ပေးသူက လက်မှတ်ရေးထိုး ထုတ်ပေးပါမည်။',
     'issuerVerified': 'အတည်ပြုပြီး ထုတ်ပေးသူ',
     'requestCredential': 'အထောက်အထား တောင်းခံရန်',
     'issuingTitle': 'သင့်အထောက်အထားကို တောင်းခံနေပါသည်',
@@ -617,14 +628,16 @@ class AppStrings {
 
     'getYourIdTitle': 'Get your Digital ID',
     'getCredentialRequest': 'Get Your Credential Request',
+    'yourDigitalIdTitle': 'Your Digital ID',
+    'yourDigitalIdSubtitle':
+        'The credential your wallet is holding right now.',
     'getYourIdSubtitle': 'Request the following credential from the issuer.',
-    'yourIdTitle': 'Your Digital ID',
-    'yourIdSubtitle': 'The credential issued to you, and the data it carries.',
     'credential': 'Credential',
     'issuer': 'Issuer',
-    'whatYouGet': 'What it contains',
+    'whatYouGet': 'What you will get',
+    'credentialContains': 'What it contains',
     'whatYouGetHint':
-        'These are the exact values the issuer signed into your credential.',
+        'These are the fields the issuer will sign into your credential.',
     'issuerVerified': 'Verified issuer',
     'requestCredential': 'Request Credential',
     'issuingTitle': 'Requesting your credential',

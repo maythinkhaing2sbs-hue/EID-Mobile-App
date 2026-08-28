@@ -109,11 +109,11 @@ class _AuthScreenState extends State<AuthScreen> {
       return;
     }
 
-    // Signing in is a one-time-code challenge rather than a stored-password
-    // check: there is no cheaper way to prove the person still holds the
-    // address on file, and what follows it — PIN, then the holder key — is
-    // the same work either way.
-    Navigator.of(context).pushNamed(Routes.registerOtp);
+    // Signing in lands on the holder key rather than on a one-time code: the
+    // account already exists, and the work still outstanding for this device is
+    // the key pair that binds credentials to it. Creating an account keeps the
+    // full path — see [_confirmSignUp], which hands back to this tab.
+    Navigator.of(context).pushNamed(Routes.keyCreate);
   }
 
   /// Confirms the new account, then hands the user to the sign-in tab with

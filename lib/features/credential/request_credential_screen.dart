@@ -3,33 +3,41 @@ import 'package:flutter/material.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/models/wallet_models.dart';
 import '../../core/models/wallet_state.dart';
+import '../../core/router/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/brand_panel.dart';
+import '../../widgets/buttons.dart';
 import '../../widgets/cards.dart';
 
-/// Screen 9 - the credential, in full (OpenID4VCI).
+/// Screen 9 - request the credential (OpenID4VCI).
 ///
-/// The screen answers three questions: what credential, from which issuer, and
-/// exactly which claims - with their values - it carries. Showing the values
-/// rather than a checklist of field names is the point: "Date of Birth" tells
-/// the holder nothing they can check, while "Date of Birth - 1990-05-15" lets
-/// them spot a wrong record in the document that bears their name.
+/// The screen answers three questions before the user commits: what credential,
+/// from which issuer, and exactly which claims - with their values - it will
+/// contain. Showing the values rather than a checklist of field names is the
+/// point: consent to "Date of Birth" is not informed consent; consent to
+/// "Date of Birth - 1990-05-15" is, and this is the last moment the holder can
+/// spot a wrong record before the issuer signs it.
 ///
-/// Read-only. Nothing on this screen starts an issuance round-trip.
+/// If the holder key does not exist yet, the primary action routes to key
+/// creation first rather than failing later inside the issuance round-trip.
 class RequestCredentialScreen extends StatelessWidget {
   const RequestCredentialScreen({super.key});
 
-  /// Render order for the claim table. Fixed here rather than taken from the
-  /// claim map so the table always reads like a physical ID card, whatever
+  /// Render order for the claim list. Fixed here rather than taken from the
+  /// claim map so the list always reads like a physical ID card, whatever
   /// order the issuer happens to return.
+  ///
+  /// Field names only, and no expiry date: nothing has been issued yet, so
+  /// every value printed here would be a value the wallet made up about a
+  /// document that does not exist. What the holder can be told at this point is
+  /// which fields the credential will carry.
   static const List<ClaimId> _claims = [
     ClaimId.fullName,
     ClaimId.dateOfBirth,
     ClaimId.nationality,
     ClaimId.documentNumber,
-    ClaimId.expiryDate,
   ];
 
   @override
@@ -40,12 +48,20 @@ class RequestCredentialScreen extends StatelessWidget {
 
     return AppScaffold(
       title: s.credential,
+      bottomBar: PrimaryButton(
+        label: wallet.hasHolderKey ? s.requestCredential : s.createKeyPair,
+        icon:
+            wallet.hasHolderKey ? Icons.download_rounded : Icons.vpn_key_rounded,
+        onPressed: () => Navigator.of(context).pushNamed(
+          wallet.hasHolderKey ? Routes.credentialIssuing : Routes.keyCreate,
+        ),
+      ),
       child: ListView(
         padding: const EdgeInsets.only(top: Gap.sm, bottom: Gap.xl),
         children: [
           ScreenHeader(
-            title: s.yourIdTitle,
-            subtitle: s.yourIdSubtitle,
+            title: s.getYourIdTitle,
+            subtitle: s.getYourIdSubtitle,
           ),
           Gap.h24,
 
@@ -54,7 +70,7 @@ class RequestCredentialScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _IssuerHeader(credential: credential),
+                IssuerHeader(credential: credential),
                 const Divider(
                     height: 1, thickness: 1, color: AppColors.divider),
                 Padding(
@@ -63,17 +79,9 @@ class RequestCredentialScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SectionLabel(
-                        s.whatYouGet,
-                        trailing: FormatChip(label: credential.format),
-                      ),
+                      SectionLabel(s.whatYouGet),
                       for (final claim in _claims)
-                        ClaimValueRow(
-                          label: claim.label(s),
-                          value: credential.claims[claim] ?? '-',
-                          tabular: claim.isTabular,
-                          first: claim == _claims.first,
-                        ),
+                        ClaimRow(label: claim.label(s)),
                       Gap.h12,
                       Text(
                         s.whatYouGetHint,
@@ -91,11 +99,12 @@ class RequestCredentialScreen extends StatelessWidget {
 
           // Only shown once the key exists, as a confirmation. A card that
           // announces a missing key would be raising an alarm the user cannot
-          // act on from here - this screen only reports what the wallet holds,
-          // and the key is created in the wallet setup flow.
+          // act on from here - the primary button already changes to
+          // "Create Holder Key Pair" and takes them to the one screen that
+          // fixes it.
           if (wallet.holderKey case final key?) ...[
             Gap.h16,
-            _HolderKeyCard(holderKey: key),
+            HolderKeyCard(holderKey: key),
           ],
 
           Gap.h16,
@@ -112,8 +121,8 @@ class RequestCredentialScreen extends StatelessWidget {
 /// Painted in the brand gradient rather than left white: this is the one object
 /// on screen that will become a government ID, and the header is the preview
 /// of it.
-class _IssuerHeader extends StatelessWidget {
-  const _IssuerHeader({required this.credential});
+class IssuerHeader extends StatelessWidget {
+  const IssuerHeader({super.key, required this.credential});
 
   final WalletCredential credential;
 
@@ -181,8 +190,8 @@ class _IssuerHeader extends StatelessWidget {
 /// has something to bind to. The screen omits this card entirely while the key
 /// is missing rather than showing a warning: the state is expected at this
 /// point in the flow, and the primary button is already the way out of it.
-class _HolderKeyCard extends StatelessWidget {
-  const _HolderKeyCard({required this.holderKey});
+class HolderKeyCard extends StatelessWidget {
+  const HolderKeyCard({super.key, required this.holderKey});
 
   final HolderKey holderKey;
 

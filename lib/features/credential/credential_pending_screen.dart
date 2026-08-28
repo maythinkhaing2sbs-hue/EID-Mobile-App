@@ -50,25 +50,32 @@ class CredentialPendingScreen extends StatelessWidget {
     return AppScaffold(
       showBack: !justSubmitted,
       title: justSubmitted ? null : s.credential,
-      bottomBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          PrimaryButton(
-            label: s.goToWalletHome,
-            onPressed: () => Navigator.of(context)
-                .pushNamedAndRemoveUntil(Routes.home, (route) => false),
-          ),
-          // Prototype-only, exactly like the scanner's "simulate a scan": the
-          // real trigger is the notification that wakes the wallet days later,
-          // and without a stand-in for it the issued screen is unreachable.
-          Gap.h8,
-          SecondaryButton(
-            label: s.simulateApproval,
-            icon: Icons.verified_rounded,
-            onPressed: () => _approve(context),
-          ),
-        ],
-      ),
+      // Actions only where the screen has to end a flow. Opened from Home to
+      // check on a request, it is a status view: the back arrow already goes
+      // where "Go to Wallet Home" would, and there is nothing here for the
+      // holder to do but read.
+      bottomBar: justSubmitted
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PrimaryButton(
+                  label: s.goToWalletHome,
+                  onPressed: () => Navigator.of(context)
+                      .pushNamedAndRemoveUntil(Routes.home, (route) => false),
+                ),
+                // Prototype-only, exactly like the scanner's "simulate a scan":
+                // the real trigger is the notification that wakes the wallet
+                // days later, and without a stand-in for it the issued screen
+                // is unreachable.
+                Gap.h8,
+                SecondaryButton(
+                  label: s.simulateApproval,
+                  icon: Icons.verified_rounded,
+                  onPressed: () => _approve(context),
+                ),
+              ],
+            )
+          : null,
       child: ListView(
         padding: const EdgeInsets.only(top: Gap.lg, bottom: Gap.xl),
         children: [

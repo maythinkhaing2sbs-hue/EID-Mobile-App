@@ -18,6 +18,7 @@ import 'package:eid_wallet/core/router/routes.dart';
 import 'package:eid_wallet/core/theme/app_theme.dart';
 import 'package:eid_wallet/core/theme/text_scale_clamp.dart';
 import 'package:eid_wallet/features/auth/auth_screen.dart';
+import 'package:eid_wallet/features/credential/credential_detail_screen.dart';
 import 'package:eid_wallet/features/credential/credential_issued_screen.dart';
 import 'package:eid_wallet/features/credential/credential_issuing_screen.dart';
 import 'package:eid_wallet/features/credential/credential_pending_screen.dart';
@@ -69,6 +70,7 @@ void main() {
     '08c-request-pending': () =>
         const CredentialPendingScreen(justSubmitted: true),
     '08d-credential-issued': () => const CredentialIssuedScreen(),
+    '08e-credential-detail': () => const CredentialDetailScreen(),
     '09-qr-scan': () => const QrScanScreen(),
     '10-review-request': () => const ReviewRequestScreen(request: _request),
     '11-select-credential': () =>

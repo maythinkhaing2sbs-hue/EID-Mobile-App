@@ -1,7 +1,9 @@
 import 'package:eid_wallet/core/models/wallet_models.dart';
 import 'package:eid_wallet/core/models/wallet_state.dart';
+import 'package:eid_wallet/features/credential/credential_detail_screen.dart';
 import 'package:eid_wallet/features/credential/credential_pending_screen.dart';
 import 'package:eid_wallet/features/home/wallet_home_screen.dart';
+import 'package:eid_wallet/widgets/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -86,6 +88,25 @@ void main() {
       expect(find.text(CredentialRequest.sample.submittedDate), findsOneWidget);
       expect(find.text(CredentialRequest.sample.expectedDate), findsOneWidget);
     });
+
+    testWidgets('opened from Home it is a status view with no actions',
+        (tester) async {
+      await setPhoneSurface(tester);
+      final wallet = WalletState();
+      wallet.pendingRequest = CredentialRequest.sample;
+
+      await tester.pumpWidget(wrapScreen(
+        const CredentialPendingScreen(),
+        wallet: wallet,
+      ));
+      await tester.pump(const Duration(milliseconds: 600));
+
+      expect(find.text(my.requestPendingTitle), findsOneWidget);
+      expect(find.text(my.goToWalletHome), findsNothing);
+      expect(find.text(my.simulateApproval), findsNothing);
+      expect(find.byType(PrimaryButton), findsNothing);
+      expect(find.byType(SecondaryButton), findsNothing);
+    });
   });
 
   group('Wallet home', () {
@@ -129,7 +150,90 @@ void main() {
 
       expect(find.text(en.requestInProgress), findsNothing);
     });
+
+    // The same tile, three situations. Nothing held and nothing filed is the
+    // only one that should open the issuance flow.
+    testWidgets('"View credential" opens issuance on an empty wallet',
+        (tester) async {
+      expect(await _viewCredentialRoute(tester, WalletState()),
+          '/credential/request');
+    });
+
+    testWidgets('"View credential" opens the waiting screen while a request is '
+        'open', (tester) async {
+      expect(
+        await _viewCredentialRoute(
+            tester, WalletState()..submitCredentialRequest()),
+        '/credential/pending',
+        reason: 'a holder who has applied must not be asked to apply again',
+      );
+    });
+
+    testWidgets('"View credential" opens the record once the ID is held',
+        (tester) async {
+      final wallet = WalletState()..submitCredentialRequest();
+      await wallet.approvePendingRequest();
+
+      expect(await _viewCredentialRoute(tester, wallet), '/credential/detail');
+    });
   });
+
+  group('Credential detail screen', () {
+    testWidgets('prints the held record with its values and offers no action',
+        (tester) async {
+      await setPhoneSurface(tester);
+      final wallet = WalletState()..submitCredentialRequest();
+      await wallet.approvePendingRequest();
+
+      await tester.pumpWidget(wrapScreen(
+        const CredentialDetailScreen(),
+        wallet: wallet,
+        locale: const Locale('en'),
+      ));
+      await tester.pump(const Duration(milliseconds: 600));
+
+      expect(find.text(en.yourDigitalIdTitle), findsOneWidget);
+      expect(find.text('Aung Ko Ko'), findsOneWidget);
+      expect(find.text('12/ABC(N)123456'), findsOneWidget);
+
+      // No "Request Credential" — the credential is already held, and a second
+      // application is the one thing this screen must not offer.
+      expect(find.text(en.requestCredential), findsNothing);
+      expect(find.byType(PrimaryButton), findsNothing);
+    });
+  });
+}
+
+/// Taps Wallet Home's "View credential" action and reports the route it pushed.
+///
+/// The surface is set wider than a phone on purpose: the bundled faces are not
+/// registered under the test binding, and the credential deck overflows by a
+/// few pixels on the substitute metrics — a harness artefact that says nothing
+/// about the layout on a device, and nothing about the routing under test.
+Future<String?> _viewCredentialRoute(
+    WidgetTester tester, WalletState wallet) async {
+  tester.view.physicalSize = const Size(1500, 3000);
+  tester.view.devicePixelRatio = 3.0;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
+  String? pushed;
+  await tester.pumpWidget(wrapScreen(
+    const WalletHomeScreen(),
+    wallet: wallet,
+    locale: const Locale('en'),
+    onGenerateRoute: (settings) {
+      pushed ??= settings.name;
+      return MaterialPageRoute<dynamic>(builder: (_) => const SizedBox());
+    },
+  ));
+  await tester.pump(const Duration(milliseconds: 600));
+
+  await tester.tap(find.text(en.actionAdd));
+  // Home keeps a looping animation alive, so the clock is driven rather than
+  // settled.
+  await tester.pump(const Duration(milliseconds: 400));
+  return pushed;
 }
 
 /// Scrolls the screen until [target] is on it. The pending screen is a list

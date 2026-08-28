@@ -26,6 +26,22 @@ import '../../widgets/verifier_logo.dart';
 class WalletHomeScreen extends StatelessWidget {
   const WalletHomeScreen({super.key});
 
+  /// Where "View credential" goes, decided by what the wallet actually has.
+  ///
+  /// The same tile answers three different situations, and each one has exactly
+  /// one useful screen behind it: a request still with the issuer belongs on the
+  /// waiting screen, a credential already held belongs on its own record, and a
+  /// wallet with neither belongs in the issuance flow. Sending all three into
+  /// the request screen would ask a holder who has already applied to apply
+  /// again, and offer a second application to one who has the document.
+  static String _credentialRoute(WalletState wallet) {
+    if (wallet.hasPendingRequest) return Routes.credentialPending;
+    if (wallet.credentials.any((c) => c.kind == CredentialKind.nationalId)) {
+      return Routes.credentialDetail;
+    }
+    return Routes.credentialRequest;
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = AppStrings.of(context);
@@ -128,7 +144,7 @@ class WalletHomeScreen extends StatelessWidget {
                             icon: Icons.badge_rounded,
                             label: s.actionAdd,
                             onTap: () => Navigator.of(context)
-                                .pushNamed(Routes.credentialRequest),
+                                .pushNamed(_credentialRoute(wallet)),
                           ),
                         ),
                       ],
